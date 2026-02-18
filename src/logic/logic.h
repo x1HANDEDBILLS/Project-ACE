@@ -1,26 +1,19 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-#include <QObject>
+#include "src/input/input_read.h"
+#include <cstdint>
 
-class Logic : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(float signalStrength READ signalStrength NOTIFY signalStrengthChanged)
-
+class Logic {
 public:
-    explicit Logic(QObject *parent = nullptr) : QObject(parent), m_signalStrength(0.95f) {}
-    
-    float signalStrength() const { return m_signalStrength; }
-
-    // ONLY the declaration here (end with a semicolon)
-    bool initialize(); 
-    void run();
-
-signals:
-    void signalStrengthChanged();
+    Logic();
+    ~Logic();
+    bool initialize();
+    void run_iteration();
 
 private:
-    float m_signalStrength;
+    InputReader reader;
+    uint64_t frame_count;
 };
 
 #endif
