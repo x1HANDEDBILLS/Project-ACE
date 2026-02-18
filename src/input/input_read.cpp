@@ -1,6 +1,5 @@
 #include "input_read.h"
 #include <cstring>
-#include <cstdio>
 
 InputReader::InputReader() {
     std::memset(&state, 0, sizeof(RawData));
@@ -23,7 +22,7 @@ void InputReader::rescanForGamepad() {
             state.connected = true;
             SDL_SetGamepadSensorEnabled(gamepad, SDL_SENSOR_GYRO, true);
             SDL_SetGamepadSensorEnabled(gamepad, SDL_SENSOR_ACCEL, true);
-            printf("\n[xACE] Gamepad Auto-Connected (%.0f ms): %s\n", (double)SDL_GetTicks() - initTime, SDL_GetGamepadName(gamepad));
+            // All startup messages removed — no printf here
         }
     }
     if (ids) SDL_free(ids);
@@ -31,7 +30,7 @@ void InputReader::rescanForGamepad() {
 
 bool InputReader::initialize() {
     if (!SDL_InitSubSystem(SDL_INIT_GAMEPAD | SDL_INIT_SENSOR | SDL_INIT_JOYSTICK)) {
-        printf("[xACE] SDL_Init failed: %s\n", SDL_GetError());
+        // printf("[xACE] SDL_Init failed: %s\n", SDL_GetError());  // Removed
         return false;
     }
 
@@ -44,14 +43,12 @@ bool InputReader::initialize() {
     rescanForGamepad();
 
     if (gamepad) {
-        printf("\n[xACE] *** CONTROLLER READY AT STARTUP! ***\n");
-        SDL_RumbleGamepad(gamepad, 0xFF, 0xFF, 1500);   // strong 1.5s rumble to fully wake PS4
+        // All rumble and press messages removed
+        SDL_RumbleGamepad(gamepad, 0xFF, 0xFF, 1500);   // still sends rumble silently
         SDL_Delay(200);
-        printf("[xACE] *** STRONG RUMBLE SENT (feel vibration now?) ***\n");
-        printf("[xACE] Press the big PS button 2-3 times now!\n");
     }
 
-    printf("[xACE] InputReader initialized\n\n");
+    // printf("[xACE] InputReader initialized\n\n");  // Removed
     return true;
 }
 
@@ -59,7 +56,7 @@ RawData InputReader::fetch_new_data() {
     callCount++;
 
     SDL_PumpEvents();
-    SDL_UpdateGamepads();   // THIS FORCES SDL TO READ FRESH DATA FROM THE KERNEL EVERY FRAME
+    SDL_UpdateGamepads();
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -92,22 +89,7 @@ RawData InputReader::fetch_new_data() {
             state.buttons[i] = SDL_GetGamepadButton(gamepad, static_cast<SDL_GamepadButton>(i));
         }
 
-        static Uint32 lastDebug = 0;
-        Uint32 now = SDL_GetTicks();
-        if (now - lastDebug > 800) {   // every 0.8 seconds
-            lastDebug = now;
-            printf("[SDL LIVE] LX=%d LY=%d RX=%d RY=%d | A=%d B=%d X=%d Y=%d | PS=%d Touch=%d\n",
-                   state.axes[SDL_GAMEPAD_AXIS_LEFTX],
-                   state.axes[SDL_GAMEPAD_AXIS_LEFTY],
-                   state.axes[SDL_GAMEPAD_AXIS_RIGHTX],
-                   state.axes[SDL_GAMEPAD_AXIS_RIGHTY],
-                   state.buttons[SDL_GAMEPAD_BUTTON_SOUTH],
-                   state.buttons[SDL_GAMEPAD_BUTTON_EAST],
-                   state.buttons[SDL_GAMEPAD_BUTTON_WEST],
-                   state.buttons[SDL_GAMEPAD_BUTTON_NORTH],
-                   state.buttons[SDL_GAMEPAD_BUTTON_START],
-                   state.buttons[SDL_GAMEPAD_BUTTON_TOUCHPAD]);
-        }
+        // Removed the [SDL LIVE] debug print loop — no more spam every 800 ms
     }
 
     return state;

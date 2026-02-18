@@ -1,6 +1,5 @@
 #include "input_manage.h"
 #include <cstring>
-#include <cstdio>
 
 InputManager::InputManager() {
     std::memset(&combined, 0, sizeof(RawData));
@@ -15,10 +14,10 @@ bool InputManager::initialize() {
     for (int i = 0; i < 3; i++) {
         if (readers[i].initialize()) {
             numConnected++;
-            printf("[xACE] Controller slot %d ready\n", i+1);
+            // All console messages removed
         }
     }
-    printf("[xACE] InputManager initialized with %d controller(s)\n", numConnected);
+    // No printf here anymore
     return numConnected > 0;
 }
 
