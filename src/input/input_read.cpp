@@ -1,109 +1,114 @@
-#include "src/input/input_read.h"
-#include <libevdev/libevdev.h>
-#include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/epoll.h>
-#include <sys/ioctl.h>
+#include "input_read.h"
 #include <cstring>
+#include <cstdio>
 
-static RawData global_state = {0};
+InputReader::InputReader() {
+    std::memset(&state, 0, sizeof(RawData));
+    initialize();
+}
 
-InputReader::InputReader() : udev_ctx(nullptr), monitor(nullptr), monitor_fd(-1), epoll_fd(-1) {}
-InputReader::~InputReader() { cleanup(); }
+InputReader::~InputReader() {
+    if (gamepad) SDL_CloseGamepad(gamepad);
+    SDL_QuitSubSystem(SDL_INIT_GAMEPAD | SDL_INIT_SENSOR | SDL_INIT_JOYSTICK);
+}
 
-void InputReader::cleanup() {
-    for (auto const& [fd, evdev] : dev_states) {
-        ioctl(fd, EVIOCGRAB, 0);
-        libevdev_free(evdev);
-        close(fd);
+void InputReader::rescanForGamepad() {
+    if (gamepad) return;
+
+    int count = 0;
+    SDL_JoystickID* ids = SDL_GetGamepads(&count);
+    if (count > 0 && ids != nullptr) {
+        gamepad = SDL_OpenGamepad(ids[0]);
+        if (gamepad) {
+            state.connected = true;
+            SDL_SetGamepadSensorEnabled(gamepad, SDL_SENSOR_GYRO, true);
+            SDL_SetGamepadSensorEnabled(gamepad, SDL_SENSOR_ACCEL, true);
+            printf("\n[xACE] Gamepad Auto-Connected (%.0f ms): %s\n", (double)SDL_GetTicks() - initTime, SDL_GetGamepadName(gamepad));
+        }
     }
-    dev_states.clear();
-    open_fds.clear();
-    if (epoll_fd >= 0) close(epoll_fd);
+    if (ids) SDL_free(ids);
 }
 
 bool InputReader::initialize() {
-    if (!udev_ctx) udev_ctx = udev_new();
-    if (!monitor) {
-        monitor = udev_monitor_new_from_netlink(udev_ctx, "udev");
-        udev_monitor_filter_add_match_subsystem_devtype(monitor, "input", NULL);
-        udev_monitor_enable_receiving(monitor);
-        monitor_fd = udev_monitor_get_fd(monitor);
+    if (!SDL_InitSubSystem(SDL_INIT_GAMEPAD | SDL_INIT_SENSOR | SDL_INIT_JOYSTICK)) {
+        printf("[xACE] SDL_Init failed: %s\n", SDL_GetError());
+        return false;
     }
 
-    cleanup();
-    epoll_fd = epoll_create1(0);
+    SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI, "1");
+    SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
+    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
-    struct udev_enumerate* enumerate = udev_enumerate_new(udev_ctx);
-    udev_enumerate_add_match_subsystem(enumerate, "input");
-    udev_enumerate_scan_devices(enumerate);
+    initTime = SDL_GetTicks();
 
-    struct udev_list_entry *devices, *entry;
-    devices = udev_enumerate_get_list_entry(enumerate);
+    rescanForGamepad();
 
-    udev_list_entry_foreach(entry, devices) {
-        struct udev_device* dev = udev_device_new_from_syspath(udev_ctx, udev_list_entry_get_name(entry));
-        const char* devnode = udev_device_get_devnode(dev);
-        
-        if (devnode && strstr(devnode, "event")) {
-            int fd = open(devnode, O_RDONLY | O_NONBLOCK);
-            if (fd >= 0) {
-                struct libevdev *evdev = nullptr;
-                if (libevdev_new_from_fd(fd, &evdev) >= 0) {
-                    if (libevdev_has_event_type(evdev, EV_ABS) || libevdev_has_event_type(evdev, EV_KEY)) {
-                        ioctl(fd, EVIOCGRAB, 1);
-                        dev_states[fd] = evdev;
-                        open_fds.push_back(fd);
-
-                        struct epoll_event ev_ep;
-                        ev_ep.events = EPOLLIN;
-                        ev_ep.data.fd = fd;
-                        epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev_ep);
-                    } else { libevdev_free(evdev); close(fd); }
-                } else { close(fd); }
-            }
-        }
-        udev_device_unref(dev);
+    if (gamepad) {
+        printf("\n[xACE] *** CONTROLLER READY AT STARTUP! ***\n");
+        SDL_RumbleGamepad(gamepad, 0xFF, 0xFF, 1500);   // strong 1.5s rumble to fully wake PS4
+        SDL_Delay(200);
+        printf("[xACE] *** STRONG RUMBLE SENT (feel vibration now?) ***\n");
+        printf("[xACE] Press the big PS button 2-3 times now!\n");
     }
-    udev_enumerate_unref(enumerate);
+
+    printf("[xACE] InputReader initialized\n\n");
     return true;
 }
 
 RawData InputReader::fetch_new_data() {
-    update_device_list();
-    struct epoll_event events[16];
-    // Polling with 0 timeout for non-blocking real-time speed
-    int n = epoll_wait(epoll_fd, events, 16, 0);
+    callCount++;
 
-    for (int i = 0; i < n; i++) {
-        int fd = events[i].data.fd;
-        struct libevdev *evdev = dev_states[fd];
-        struct input_event ev;
-        
-        // DRAIN LOOP: This is the secret to "Smooth" inputs.
-        // We keep reading until the buffer is totally empty.
-        while (libevdev_next_event(evdev, LIBEVDEV_READ_FLAG_NORMAL, &ev) == LIBEVDEV_READ_STATUS_SUCCESS) {
-            if (ev.type == EV_ABS && ev.code < 64) {
-                global_state.values[ev.code] = ev.value;
-                global_state.device_mask = 1;
-            } else if (ev.type == EV_KEY) {
-                // Universal Button Mapping
-                int btn_idx = 64 + (ev.code - 0x100);
-                if (btn_idx >= 64 && btn_idx < 128) {
-                    global_state.values[btn_idx] = ev.value;
-                }
-            }
+    SDL_PumpEvents();
+    SDL_UpdateGamepads();   // THIS FORCES SDL TO READ FRESH DATA FROM THE KERNEL EVERY FRAME
+
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+                if (event.gaxis.axis < 16) state.axes[event.gaxis.axis] = event.gaxis.value;
+                break;
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+            case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                if (event.gbutton.button < 32) state.buttons[event.gbutton.button] = (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN);
+                break;
+            case SDL_EVENT_GAMEPAD_SENSOR_UPDATE:
+                if (event.gsensor.sensor == SDL_SENSOR_GYRO) std::memcpy(state.gyro, event.gsensor.data, sizeof(float)*3);
+                break;
+            case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
+            case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+            case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+                state.touch[0].x = event.gtouchpad.x;
+                state.touch[0].y = event.gtouchpad.y;
+                state.touch[0].down = (event.type != SDL_EVENT_GAMEPAD_TOUCHPAD_UP);
+                break;
         }
     }
-    return global_state;
-}
 
-void InputReader::update_device_list() {
-    if (!monitor) return;
-    struct udev_device* dev = udev_monitor_receive_device(monitor);
-    if (dev) {
-        initialize();
-        udev_device_unref(dev);
+    if (gamepad) {
+        for (int i = 0; i < 16; i++) {
+            state.axes[i] = SDL_GetGamepadAxis(gamepad, static_cast<SDL_GamepadAxis>(i));
+        }
+        for (int i = 0; i < 32; i++) {
+            state.buttons[i] = SDL_GetGamepadButton(gamepad, static_cast<SDL_GamepadButton>(i));
+        }
+
+        static Uint32 lastDebug = 0;
+        Uint32 now = SDL_GetTicks();
+        if (now - lastDebug > 800) {   // every 0.8 seconds
+            lastDebug = now;
+            printf("[SDL LIVE] LX=%d LY=%d RX=%d RY=%d | A=%d B=%d X=%d Y=%d | PS=%d Touch=%d\n",
+                   state.axes[SDL_GAMEPAD_AXIS_LEFTX],
+                   state.axes[SDL_GAMEPAD_AXIS_LEFTY],
+                   state.axes[SDL_GAMEPAD_AXIS_RIGHTX],
+                   state.axes[SDL_GAMEPAD_AXIS_RIGHTY],
+                   state.buttons[SDL_GAMEPAD_BUTTON_SOUTH],
+                   state.buttons[SDL_GAMEPAD_BUTTON_EAST],
+                   state.buttons[SDL_GAMEPAD_BUTTON_WEST],
+                   state.buttons[SDL_GAMEPAD_BUTTON_NORTH],
+                   state.buttons[SDL_GAMEPAD_BUTTON_START],
+                   state.buttons[SDL_GAMEPAD_BUTTON_TOUCHPAD]);
+        }
     }
+
+    return state;
 }

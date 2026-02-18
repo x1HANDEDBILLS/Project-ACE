@@ -1,18 +1,19 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-#include "src/input/input_read.h"
+#include "../input/input_manage.h"
 #include <cstdint>
 
 class Logic {
 public:
     Logic();
     ~Logic();
+
     bool initialize();
     void run_iteration();
 
 private:
-    InputReader reader;
+    InputManager inputManager;   // now supports up to 3 controllers combined
     uint64_t frame_count;
 };
 

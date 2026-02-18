@@ -1,71 +1,54 @@
-#include "src/logic/logic.h"
-#include <iostream>
-#include <time.h>
+#include "logic.h"
 #include <cstdio>
 
 Logic::Logic() : frame_count(0) {
-    // Clear screen and hide cursor
-    printf("\033[2J\033[H\033[?25l"); 
+    printf("\033[2J\033[H\033[?25l");
 }
 
-Logic::~Logic() {
-    printf("\033[?25h\n");
+Logic::~Logic() { 
+    printf("\033[?25h\n"); 
 }
 
 bool Logic::initialize() {
-    return reader.initialize();
+    return inputManager.initialize();
 }
 
 void Logic::run_iteration() {
-    struct timespec next_beat;
-    static struct timespec start_time = {0, 0};
-    if (start_time.tv_sec == 0) clock_gettime(CLOCK_MONOTONIC, &start_time);
+    inputManager.update();
+    RawData data = inputManager.getCombined();
 
-    RawData raw = reader.fetch_new_data();
+    if (frame_count % 50 == 0) { 
+        printf("\033[H"); 
+        printf("╔═══════════════ xACE ABSOLUTE DYNAMIC ENGINE ══════════════╗\n");
+        if (data.connected) {
+            printf("║ STICKS │ LX:%6d LY:%6d │ RX:%6d RY:%6d ║\n", 
+                   data.axes[0], data.axes[1], data.axes[2], data.axes[3]);
+            
+            printf("╠══════════════════════ BUTTON MAPPING ═════════════════════╣\n");
+            printf("║ FACE:  A:%s B:%s X:%s Y:%s │ DPAD: %s %s %s %s ║\n",
+                data.buttons[0]?"█":"·", data.buttons[1]?"█":"·", data.buttons[2]?"█":"·", data.buttons[3]?"█":"·",
+                data.buttons[11]?"↑":"·", data.buttons[12]?"↓":"·", data.buttons[13]?"←":"·", data.buttons[14]?"→":"·");
+            
+            printf("║ SYSTEM: PS:%s  TPAD-CLK:%s  SHARE:%s  OPT:%s         ║\n",
+                data.buttons[5]?"█":"·", data.buttons[15]?"█":"·", data.buttons[4]?"█":"·", data.buttons[6]?"█":"·");
 
-    // 30Hz Display update is enough for human eyes, while engine stays 1000Hz
-    if (frame_count % 33 == 0) {
-        printf("\033[H"); // Move cursor to top-left
-        printf("====================================================\n");
-        printf("   xACE ALL-INPUT TESTER (Static Persistence)       \n");
-        printf("====================================================\n");
-        printf(" NODES: %-2zu | MASK: %-4u | FRAME: %-8lu\n", 
-                reader.get_open_fd_count(), raw.device_mask, frame_count);
-        printf("----------------------------------------------------\n");
+            printf("╠═══════════════════════ SENSOR DATA ═══════════════════════╣\n");
+            printf("║ GYRO   │ P:%7.2f  Y:%7.2f  R:%7.2f         ║\n", 
+                   data.gyro[0], data.gyro[1], data.gyro[2]);
+            printf("║ TOUCH  │ X:%7.2f  Y:%7.2f  DOWN:%-3s            ║\n", 
+                   data.touch[0].x, data.touch[0].y, data.touch[0].down ? "YES" : "NO ");
 
-        printf(" [ANALOG SLOTS]\n");
-        int count = 0;
-        for (int i = 0; i < 64; i++) {
-            // Only show slots that have actually been touched
-            if (raw.values[i] != 0) {
-                printf(" %2d: %-8d ", i, raw.values[i]);
-                if (++count % 4 == 0) printf("\n");
-            }
+            printf("╠══════════════════════ RAW SCANNER ════════════════════════╣\n");
+            printf("║ BTNS 0-7  : ");
+            for(int i=0; i<8; i++) printf("%d", data.buttons[i]);
+            printf("  BTNS 8-15 : ");
+            for(int i=8; i<16; i++) printf("%d", data.buttons[i]);
+            printf(" ║\n");
+        } else {
+            printf("║          LISTENING FOR ANY USB/BT DEVICE...               ║\n");
+            for(int i=0; i<8; i++) printf("║                                                           ║\n");
         }
-        // Clean up the line if we didn't end on a newline
-        if (count % 4 != 0) printf("\n");
-
-        printf("\n [BUTTONS ACTIVE]\n ");
-        bool any_btn = false;
-        for (int i = 64; i < 128; i++) {
-            if (raw.values[i] > 0) {
-                printf("[%d] ", i);
-                any_btn = true;
-            }
-        }
-        if(!any_btn) printf("None                ");
-        
-        printf("\n\033[K"); // Clear to end of line
-        printf("====================================================\n");
-        fflush(stdout);
+        printf("╚═══════════════════════════════════════════════════════════╝\n");
     }
-
     frame_count++;
-    next_beat = start_time;
-    next_beat.tv_nsec += frame_count * 1000000;
-    while (next_beat.tv_nsec >= 1000000000) {
-        next_beat.tv_nsec -= 1000000000;
-        next_beat.tv_sec++;
-    }
-    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_beat, NULL);
 }

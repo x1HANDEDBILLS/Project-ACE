@@ -1,40 +1,34 @@
-#ifndef INPUT_READ_H
-#define INPUT_READ_H
+#pragma once
+#include <SDL3/SDL.h>
 
-#include <libudev.h>
-#include <libevdev/libevdev.h>
-#include <string>
-#include <vector>
-#include <map>
-#include <cstdint>
+struct TouchData {
+    float x = 0.0f;
+    float y = 0.0f;
+    bool down = false;
+};
 
 struct RawData {
-    uint64_t timestamp;
-    int32_t values[128]; 
-    uint32_t device_mask;
+    bool connected = false;
+    int axes[16] = {0};
+    bool buttons[32] = {false};
+    float gyro[3] = {0.0f};
+    TouchData touch[1];
+    int battery_percent = 0;
 };
 
 class InputReader {
 public:
     InputReader();
     ~InputReader();
+
     bool initialize();
     RawData fetch_new_data();
-    
-    // ADD THIS LINE TO FIX THE COMPILER ERROR
-    size_t get_open_fd_count() const { return open_fds.size(); }
 
 private:
-    struct udev* udev_ctx;
-    struct udev_monitor* monitor;
-    int monitor_fd;
-    int epoll_fd;
+    SDL_Gamepad* gamepad = nullptr;
+    RawData state;
+    Uint32 initTime = 0;
+    int callCount = 0;          // ← Fixed: was missing
 
-    std::map<int, struct libevdev*> dev_states;
-    std::vector<int> open_fds;
-
-    void cleanup();
-    void update_device_list();
+    void rescanForGamepad();
 };
-
-#endif
