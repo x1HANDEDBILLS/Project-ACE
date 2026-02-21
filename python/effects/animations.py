@@ -39,7 +39,7 @@ def get_telemetry_state(current_val, is_transitioning, is_dropping):
         target = random.uniform(92.0, 98.0)
     
     new_val = current_val + (target - current_val) * 0.12
-    status_text = "// CONNECTION_STABLE" if not is_dropping else "// SIGNAL_DEGRADED"
+    status_text = "// CONNECTION_STABLE" if not is_dropping else "// SIGNAL_INTERFERENCE"
     return status_text, new_val, is_dropping
 
 # --- GLOBAL SYNC CONTROLLER ---

@@ -21,7 +21,7 @@ class DashboardPanel(QWidget):
         # 2. SHIELD (Overlay)
         self.shield = QFrame(self)
         self.shield.hide()
-        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 100);")
+        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
         # Removed the mousePressEvent that closes everything on touch
 
         # 3. SETTINGS PANEL (Fixed Side-Filler)
