@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QWidget, QFrame, QVBoxLayout
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint
+from PySide6.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint, QRect
 from widgets.button import CustomButton 
 from dash.panel_buttons import PanelButtons
-from dash.settings import SettingsPanel # Import the separate file
+from widgets.popout import TacticalPopout 
+from dash.settings import SettingsPanel 
 import theme
 
 class DashboardPanel(QWidget):
@@ -11,42 +12,57 @@ class DashboardPanel(QWidget):
         
         # 1. MAIN HUD GEAR
         self.settings_btn = CustomButton("⚙", self)
-        self.settings_btn.setFixedSize(80, 80)
+        self.settings_btn.setFixedSize(74, 74)
         self.settings_btn.font_size = 42 
         self.settings_btn.edge_size = 12.0
+        self.settings_btn.y_nudge = -4 
         self.settings_btn.clicked.connect(self.toggle_sidebar)
 
-        # 2. SHIELD (Blocking clicks on the background)
+        # 2. SHIELD (Overlay)
         self.shield = QFrame(self)
         self.shield.hide()
-        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
-        self.shield.mousePressEvent = lambda e: e.accept()
+        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 100);")
+        # Removed the mousePressEvent that closes everything on touch
 
-        # 3. SETTINGS GUI (Modularly loaded)
-        self.sub_panel = SettingsPanel(self)
-        self.sub_panel.hide()
+        # 3. SETTINGS PANEL (Fixed Side-Filler)
+        self.settings_gui = SettingsPanel(self.shield)
+        # 834 width fills the gap next to the 190px sidebar
+        self.settings_gui.setFixedSize(834, 600)
+        self.settings_gui.hide()
 
-        # 4. SIDEBAR (Fixed 190px)
+        # 4. THEME SUB-POPOUT (Animated HUD - stays as a popout)
+        self.theme_panel = TacticalPopout(self.shield)
+        self.theme_panel.hide()
+        theme_label = QLabel("SELECT SYSTEM COLOR\n\n[ AMBER ]\n[ CYAN ]\n[ RED ]")
+        theme_label.setStyleSheet(f"color: {theme.ACTIVE['hex']}; font-family: 'Consolas'; font-size: 14px;")
+        theme_label.setAlignment(Qt.AlignCenter)
+        self.theme_panel.main_layout.insertWidget(1, theme_label)
+
+        # 5. SIDEBAR
         self.sidebar_width = 190
         self.sidebar = QFrame(self)
         self.sidebar.setAttribute(Qt.WA_StyledBackground)
-        self.sidebar.setStyleSheet(f"QFrame {{ background-color: rgba(5, 5, 5, 180); border-left: 2px solid {theme.ACTIVE['hex']}; }}")
+        self.sidebar.setStyleSheet(f"QFrame {{ background-color: rgba(5, 5, 5, 220); border-left: 2px solid {theme.ACTIVE['hex']}; }}")
         
         self.sidebar_container = QVBoxLayout(self.sidebar)
         self.sidebar_container.setContentsMargins(0, 0, 0, 0)
         self.button_grid = PanelButtons(self.sidebar)
         self.sidebar_container.addWidget(self.button_grid)
         
-        # Connect Grid Buttons
         self.button_grid.back_btn.clicked.connect(self.smart_back)
-        self.button_grid.inner_settings_btn.clicked.connect(self.toggle_sub_panel)
+        self.button_grid.inner_settings_btn.clicked.connect(self.toggle_settings_gui)
 
-        # Animation (Sidebar ONLY)
+        # Animation State
         self.sidebar_open = False
-        self.sub_open = False
+        self.settings_open = False
+        self.theme_open = False
         self.anim_side = QPropertyAnimation(self.sidebar, b"pos")
         self.anim_side.setDuration(250)
         self.anim_side.setEasingCurve(QEasingCurve.OutCubic)
+
+    def update_panel(self, proc):
+        if hasattr(self, 'settings_gui'):
+            self.settings_gui.update_state(proc)
 
     def toggle_sidebar(self):
         w, h = self.width(), self.height()
@@ -56,6 +72,8 @@ class DashboardPanel(QWidget):
             self.sidebar.show()
             self.shield.raise_() 
             self.sidebar.raise_()
+            
+            self.anim_side.stop()
             self.anim_side.setStartValue(QPoint(w, 0))
             self.anim_side.setEndValue(QPoint(w - self.sidebar_width, 0))
             self.sidebar_open = True
@@ -63,28 +81,44 @@ class DashboardPanel(QWidget):
         else:
             self.smart_back()
 
-    def toggle_sub_panel(self):
-        if not self.sub_open:
-            self.sub_open = True
-            self.update_geometries() # Snap to current screen size
-            self.sub_panel.show()
-            self.sub_panel.raise_()
-            self.sidebar.raise_() # Sidebar border overlays the settings
+    def toggle_settings_gui(self):
+        if not self.settings_open:
+            self.settings_open = True
+            # Positioned at 0,0 to fill the left side
+            self.settings_gui.move(0, 0)
+            self.settings_gui.show()
+            self.settings_gui.raise_()
         else:
-            self.sub_open = False
-            self.sub_panel.hide()
+            self.settings_open = False
+            self.settings_gui.hide()
+
+    def toggle_theme_panel(self):
+        if not self.theme_open:
+            self.theme_open = True
+            # Center the theme popout specifically within the 834px settings area
+            target_x = (834 - self.theme_panel.width()) // 2
+            target_y = (600 - self.theme_panel.height()) // 2
+            self.theme_panel.move(target_x, target_y)
+            self.theme_panel.show_hud()
+        else:
+            self.theme_open = False
+            self.theme_panel.hide_hud()
 
     def smart_back(self):
-        if self.sub_open:
-            self.sub_open = False
-            self.sub_panel.hide()
+        if self.theme_open:
+            self.theme_open = False
+            self.theme_panel.hide_hud()
+        elif self.settings_open:
+            self.settings_open = False
+            self.settings_gui.hide()
         elif self.sidebar_open:
             w = self.width()
+            self.anim_side.stop()
             self.anim_side.setStartValue(self.sidebar.pos())
             self.anim_side.setEndValue(QPoint(w, 0))
             self.sidebar_open = False
-            self.anim_side.start()
             self.anim_side.finished.connect(self._on_sidebar_closed)
+            self.anim_side.start()
 
     def _on_sidebar_closed(self):
         if not self.sidebar_open:
@@ -93,27 +127,15 @@ class DashboardPanel(QWidget):
             try: self.anim_side.finished.disconnect(self._on_sidebar_closed)
             except: pass
 
-    def update_geometries(self):
-        """Calculates the 190px sidebar vs the Full-Screen remainder"""
+    def resizeEvent(self, event):
         w, h = self.width(), self.height()
+        btn_w = self.settings_btn.width()
+        self.settings_btn.move(w - btn_w - 10, 10)
+        self.shield.setGeometry(0, 0, w, h)
         
-        # 1. Settings Panel takes everything left of the sidebar
-        remainder_width = w - self.sidebar_width
-        self.sub_panel.setGeometry(0, 0, remainder_width, h)
-        
-        # 2. Sidebar sticks to the right edge
         if self.sidebar_open:
             self.sidebar.setGeometry(w - self.sidebar_width, 0, self.sidebar_width, h)
         else:
             self.sidebar.setGeometry(w, 0, self.sidebar_width, h)
-
-    def resizeEvent(self, event):
-        w, h = self.width(), self.height()
-        self.settings_btn.move(w - 90, 10)
-        self.shield.setGeometry(0, 0, w, h)
-        self.update_geometries()
+            
         super().resizeEvent(event)
-
-    def update_panel(self, proc):
-        if self.sub_open:
-            self.sub_panel.update_state(proc)

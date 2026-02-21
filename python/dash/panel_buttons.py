@@ -6,8 +6,10 @@ class PanelButtons(QWidget):
         super().__init__(parent)
         
         self.layout = QGridLayout(self)
-        self.layout.setContentsMargins(10, 10, 10, 10)
-        self.layout.setSpacing(10)
+        
+        # New Math for 190px sidebar: 14px margins/spacing perfectly centers 74px buttons
+        self.layout.setContentsMargins(14, 10, 10, 10)
+        self.layout.setSpacing(14)
         
         self.buttons = []
         
@@ -15,17 +17,16 @@ class PanelButtons(QWidget):
             row = i // 2
             col = i % 2
             
-            # Create the button
             btn = CustomButton("", self)
-            btn.setFixedSize(80, 80)
+            btn.setFixedSize(74, 74)
             btn.font_size = 42
             btn.edge_size = 12.0
             
-            # Assign specific roles based on position
-            if i == 1:  # Top Right
-                btn.setText("→")
+            if i == 1:
+                # Use a standard arrow or adjust the string for the custom painter
+                btn.setText("→") 
                 self.back_btn = btn
-            elif i == 13:  # Bottom Right
+            elif i == 13:
                 btn.setText("⚙")
                 self.inner_settings_btn = btn
             
