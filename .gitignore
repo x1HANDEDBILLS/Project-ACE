@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+ace_venv/
+.DS_Store
+*.sock
