@@ -84,7 +84,7 @@ def run():
     # Main UI Refresh Timer (~60 FPS)
     # This pushes the logic state into the dashboard for visual updates
     ui_timer = QTimer()
-    ui_timer.timeout.connect(lambda: view.show(proc))
+    ui_timer.timeout.connect(lambda: view.show_update(proc))
     ui_timer.start(16)
 
     # 3. CLEAN SHUTDOWN HANDLER

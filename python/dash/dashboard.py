@@ -19,7 +19,7 @@ class Dashboard(QMainWindow):
         
         # Ensure theme is ready
         if not theme.ACTIVE:
-            theme.set_active_theme("RED")
+            theme.set_active_theme(theme.load_saved_hex())
         
         # 2. ROOT WIDGET & MAIN LAYOUT
         self.central = QWidget()
@@ -35,6 +35,24 @@ class Dashboard(QMainWindow):
         self.main_layout.addWidget(self.panel)
         
         self.showFullScreen()
+
+    def refresh_theme(self):
+        """ 
+        SMART REFRESH: This is called by theme.py automatically 
+        whenever 'Save Theme Color' is pressed.
+        """
+        # 1. Clear the old background cache
+        self._bg_cache = None
+        
+        # 2. Force a new gradient generation
+        self._bg_cache = theme.get_numpy_gradient(self.width(), self.height())
+        
+        # 3. If the panel has its own refresh logic, trigger it
+        if hasattr(self.panel, 'refresh_theme'):
+            self.panel.refresh_theme()
+            
+        # 4. Redraw the whole window
+        self.update()
 
     def attach_widget(self, widget):
         """ Utility to add extra modules if needed later """
@@ -54,7 +72,7 @@ class Dashboard(QMainWindow):
         finally:
             p.end() 
 
-    def show(self, proc):
+    def show_update(self, proc): # Renamed from show to avoid confusion with QWidget.show()
         """ MAIN UPDATE BRIDGE """
         if hasattr(self, 'panel'):
             self.panel.update_panel(proc)

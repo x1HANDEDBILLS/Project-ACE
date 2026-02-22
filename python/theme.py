@@ -1,8 +1,27 @@
 import numpy as np
+import json
+import os
 from PySide6.QtGui import QColor, QImage, QPixmap
 from PySide6.QtWidgets import QApplication
 
-# 1. THEME DEFINITIONS (Global Source of Truth)
+# --- PERSISTENCE LOGIC ---
+# Locates settings.json in the same folder as this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
+
+def load_saved_hex():
+    """Reads the saved hex color from settings.json or returns RED as default."""
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                data = json.load(f)
+                saved_color = data.get('theme_color', "#FF1E1E")
+                return saved_color
+        except Exception as e:
+            print(f"[THEME] Load error: {e}")
+    return "#FF1E1E"
+
+# 1. THEME DEFINITIONS (Global Presets)
 THEMES = {
     "RED":    {"p": (255, 30, 30),   "s": (160, 165, 175), "bg_l": (45, 5, 5),   "bg_d": (10, 2, 2),   "hex": "#FF1E1E"},
     "CYAN":    {"p": (0, 255, 255),  "s": (150, 165, 180), "bg_l": (5, 35, 45),  "bg_d": (2, 5, 10),   "hex": "#00FFFF"},
@@ -12,8 +31,14 @@ THEMES = {
 
 ACTIVE = {}
 
-def set_active_theme(name_or_rgb="CYAN"):
+def set_active_theme(name_or_rgb="RED"):
+    """
+    Sets the global ACTIVE theme. 
+    Accepts preset names ("RED"), Hex strings ("#FFFFFF"), or RGB tuples (255,0,0).
+    """
     global ACTIVE
+    
+    # CASE A: Hex string (from Color Picker)
     if isinstance(name_or_rgb, str) and name_or_rgb.startswith("#"):
         c = QColor(name_or_rgb)
         r, g, b = c.red(), c.green(), c.blue()
@@ -22,8 +47,10 @@ def set_active_theme(name_or_rgb="CYAN"):
             "bg_l": (int(r*0.15), int(g*0.15), int(b*0.15)), "bg_d": (5, 5, 5),
             "hex": name_or_rgb
         }
+    # CASE B: Preset Name string
     elif isinstance(name_or_rgb, str):
-        data = THEMES.get(name_or_rgb.upper(), THEMES["CYAN"])
+        data = THEMES.get(name_or_rgb.upper(), THEMES["RED"])
+    # CASE C: RGB Tuple
     else:
         r, g, b = name_or_rgb
         data = {
@@ -42,14 +69,26 @@ def set_active_theme(name_or_rgb="CYAN"):
         "raw_p": data["p"]
     })
 
+    # --- SMART REFRESH TRIGGER ---
     app = QApplication.instance()
-    if app: app.setStyleSheet(get_global_qss())
+    if app: 
+        # Update global stylesheet
+        app.setStyleSheet(get_global_qss())
+        
+        # Tell every widget to look at the new ACTIVE dict and repaint
+        for widget in app.allWidgets():
+            # If a widget has a custom "refresh_theme" function, run it
+            if hasattr(widget, 'refresh_theme'):
+                widget.refresh_theme()
+            # Force a standard repaint for all other widgets
+            widget.update()
 
 def get_numpy_gradient(w, h):
+    """Generates a dithered background gradient based on the ACTIVE theme."""
     if w <= 0 or h <= 0: return QPixmap()
-    if not ACTIVE: set_active_theme("RED")
+    if not ACTIVE: set_active_theme(load_saved_hex())
     
-    # 1. Create the base slope
+    # Create normalized meshgrid
     x = np.linspace(0, 1, w, dtype=np.float32)
     y = np.linspace(0, 1, h, dtype=np.float32)
     xv, yv = np.meshgrid(x, y)
@@ -57,14 +96,12 @@ def get_numpy_gradient(w, h):
     
     c_l, c_d = ACTIVE["bg_light"], ACTIVE["bg_dark"]
     
-    # 2. Calculate base colors
+    # Color interpolation
     r_base = (c_l[0] + (c_d[0] - c_l[0]) * ratio)
     g_base = (c_l[1] + (c_d[1] - c_l[1]) * ratio)
     b_base = (c_l[2] + (c_d[2] - c_l[2]) * ratio)
 
-    # 3. HIGH-QUALITY DITHER (The Fix)
-    # We use a normal distribution noise to "blur" the color steps
-    # Increase the 'scale' (e.g., to 1.5 or 2.0) if you still see lines
+    # Apply Dither noise to prevent banding on the Pi screen
     noise = np.random.normal(loc=0.0, scale=1.2, size=(h, w)).astype(np.float32)
     
     r = np.clip(r_base + noise, 0, 255).astype(np.uint8)
@@ -76,10 +113,16 @@ def get_numpy_gradient(w, h):
     return QPixmap.fromImage(img)
 
 def get_global_qss():
+    """Returns the CSS string for the application based on the current ACTIVE theme."""
+    p_hex = ACTIVE.get("hex", "#FF1E1E")
     s = "rgb(160, 165, 175)"
     return f"""
         QWidget {{ background-color: transparent; color: {s}; font-family: 'Consolas'; font-size: 13px; }}
         QMainWindow {{ background-color: #050505; }}
+        QLabel#ThemeLabel {{ color: {p_hex}; }}
+        /* Specific tactical classes */
+        .TacticalLabel {{ color: {p_hex}; font-weight: bold; }}
     """
 
-set_active_theme("RED")
+# --- AUTO-INITIALIZATION ON BOOT ---
+set_active_theme(load_saved_hex())

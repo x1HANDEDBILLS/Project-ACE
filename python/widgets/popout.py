@@ -1,6 +1,6 @@
 import numpy as np
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel
-from PySide6.QtGui import QPainter, QPen, QPainterPath, QColor, QBrush, QImage, QPixmap
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel
+from PySide6.QtGui import QPainter, QPen, QPainterPath, QColor, QBrush, QImage, QPixmap, QGuiApplication
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QRect, QPoint, Signal
 
 import theme
@@ -11,7 +11,7 @@ from widgets.button_mini import MiniTacticalButton
 GLITCH_MARGIN = 40
 
 class TacticalPopout(QWidget):
-    # Signal to tell DashboardPanel we closed so it can reset its state
+    # Signal to tell DashboardPanel we closed
     closed_manually = Signal()
 
     def __init__(self, parent):
@@ -19,8 +19,8 @@ class TacticalPopout(QWidget):
         self.setWindowFlags(Qt.SubWindow | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         
-        self.base_w, self.base_h = 500, 320
-        # The full size including glitch margins
+        # Base size calculation
+        self.base_w, self.base_h = 520, 440
         self.total_w = self.base_w + (GLITCH_MARGIN * 2)
         self.total_h = self.base_h + (GLITCH_MARGIN * 2)
         self.setFixedSize(self.total_w, self.total_h)
@@ -30,91 +30,128 @@ class TacticalPopout(QWidget):
         self.is_dragging = False
         self.drag_offset = QPoint()
 
-        # UI Components
-        self.title = QLabel("// SYSTEM_READY", self)
-        self.title.setStyleSheet(f"color: {theme.ACTIVE['hex']}; font-family: Consolas; font-weight: bold; font-size: 11px;")
+        # --- UI LAYOUT ---
         
+        # 1. Title
+        self.title = QLabel("// SYSTEM_READY", self)
+        
+        # 2. Signal Info
         self.sig_container = QWidget(self)
-        sig_layout = QHBoxLayout(self.sig_container)
-        sig_layout.setContentsMargins(0, 0, 0, 0)
-        sig_layout.setSpacing(5)
+        self.sig_layout = QHBoxLayout(self.sig_container)
+        self.sig_layout.setContentsMargins(0, 0, 0, 0)
+        self.sig_layout.setSpacing(5)
         
         self.sig_icon = SignalIcon()
         self.sig_label = QLabel("SIGNAL: 0%")
-        self.sig_label.setStyleSheet(f"color: {theme.ACTIVE['hex']}; font-family: Consolas; font-size: 11px; font-weight: bold;")
         
-        sig_layout.addWidget(self.sig_icon)
-        sig_layout.addWidget(self.sig_label)
+        self.sig_layout.addWidget(self.sig_icon)
+        self.sig_layout.addWidget(self.sig_label)
 
+        # 3. Dynamic Content Socket
+        self.content_area = QWidget(self)
+        self.content_layout = QVBoxLayout(self.content_area)
+        self.content_layout.setContentsMargins(GLITCH_MARGIN + 20, 50, GLITCH_MARGIN + 20, 70)
+
+        # 4. Close Button
         self.close_btn = MiniTacticalButton("Close", self, small=True)
         self.close_btn.setFixedSize(80, 30)
         self.close_btn.clicked.connect(self.hide_hud)
 
+        # --- EFFECTS & ANIMATION ---
         self.fx = TacticalGlitchEffect()
         self.setGraphicsEffect(self.fx)
         self.glitch_timer = QTimer(self)
         self.glitch_timer.timeout.connect(self._update_cycle)
         
         self.anim = QPropertyAnimation(self, b"geometry")
-        # Connect once to handle the cleanup after closing animation
         self.anim.finished.connect(self._finalize_anim)
         
         GLOBAL_TELEMETRY.updated.connect(self._sync_telemetry)
 
+        # Initial style application
+        self.refresh_theme()
+
+    def refresh_theme(self):
+        """
+        SMART REFRESH: Triggered by theme.py to update colors and 
+        regenerate the background gradient.
+        """
+        h_hex = theme.ACTIVE.get('hex', "#FF1E1E")
+        m = GLITCH_MARGIN
+        w, h_inner = self.width() - (m*2), self.height() - (m*2)
+
+        # 1. Regenerate Background Cache
+        self._bg_pixmap = theme.get_numpy_gradient(w, h_inner)
+
+        # 2. Re-apply Stylesheets
+        self.title.setStyleSheet(f"color: {h_hex}; font-family: Consolas; font-weight: bold; font-size: 11px;")
+        self.sig_label.setStyleSheet(f"color: {h_hex}; font-family: Consolas; font-size: 11px; font-weight: bold;")
+
+        # 3. Propagate to children
+        if hasattr(self.sig_icon, 'refresh_theme'):
+            self.sig_icon.refresh_theme()
+            
+        # Recursive update for any content (like ColorPicker) inside the layout
+        for i in range(self.content_layout.count()):
+            widget = self.content_layout.itemAt(i).widget()
+            if widget and hasattr(widget, 'refresh_theme'):
+                widget.refresh_theme()
+
+        self.update()
+
+    def set_content(self, widget, title_text="// SYSTEM_CONFIG"):
+        """Plug a widget into the popout and update the header"""
+        self.title.setText(title_text)
+        self.title.adjustSize()
+        
+        for i in reversed(range(self.content_layout.count())): 
+            w = self.content_layout.itemAt(i).widget()
+            if w: w.setParent(None)
+        
+        self.content_layout.addWidget(widget)
+
     def show_hud(self):
-        """Centered on the physical display using Global-to-Local mapping"""
+        """Centered on display with expansion animation"""
         self._is_closing = False
-        self._bg_pixmap = None 
         
-        # 1. Get the geometry of the actual screen (the Pi display)
-        # Using primaryScreen() ensures we get the hardware resolution
-        from PySide6.QtGui import QGuiApplication
+        # Failsafe: Ensure background exists before animating
+        if self._bg_pixmap is None:
+            self.refresh_theme()
+        
         screen_geo = QGuiApplication.primaryScreen().geometry()
-        
-        # 2. Calculate where the top-left should be in 'Global' space
         global_x = (screen_geo.width() - self.width()) // 2
         global_y = (screen_geo.height() - self.height()) // 2
-        global_target_point = QPoint(global_x, global_y)
         
-        # 3. Map that Global point to our Parent's local coordinates
         if self.parent():
-            # This is the 'Magic' line that fixes centering issues
-            local_point = self.parent().mapFromGlobal(global_target_point)
-            target_x, target_y = local_point.x(), local_point.y()
+            local_pos = self.parent().mapFromGlobal(QPoint(global_x, global_y))
+            tx, ty = local_pos.x(), local_pos.y()
         else:
-            target_x, target_y = global_x, global_y
+            tx, ty = global_x, global_y
 
-        full_geom = QRect(target_x, target_y, self.width(), self.height())
+        full_geom = QRect(tx, ty, self.width(), self.height())
+        start_geom = QRect(tx, ty + (self.height() // 2), self.width(), 4)
         
-        # 4. Define the 'Collapsed' start state (horizontal line)
-        start_geom = QRect(target_x, target_y + (self.height() // 2), self.width(), 4)
-        
-        # Set initial state
         self.setGeometry(start_geom)
         self.show()
         self.raise_()
 
-        # 5. Run expansion animation
         self.anim.stop()
-        self.anim.setDuration(350)
-        self.anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.anim.setDuration(400)
+        self.anim.setEasingCurve(QEasingCurve.OutExpo)
         self.anim.setStartValue(start_geom)
         self.anim.setEndValue(full_geom)
         
-        self.fx.intensity = 18
+        self.fx.intensity = 20
         self.glitch_timer.start(50)
         self.anim.start()
 
     def hide_hud(self):
-        """Closing animation: Collapse to center line"""
         if self._is_closing: return
         self._is_closing = True
-        
         self.fx.intensity = 15
         self.glitch_timer.start(50)
         
         curr = self.geometry()
-        # Collapse to a horizontal line
         end_geom = QRect(curr.x(), curr.y() + (curr.height() // 2), curr.width(), 4)
         
         self.anim.stop()
@@ -124,15 +161,12 @@ class TacticalPopout(QWidget):
         self.anim.setEndValue(end_geom)
         self.anim.start()
         
-        # Notify Dashboard state
         self.closed_manually.emit()
 
     def _finalize_anim(self):
-        """Only hides the widget if we were in the middle of closing"""
         if self._is_closing:
             self.hide()
-            if self.parent():
-                self.parent().hide()
+            if self.parent(): self.parent().hide()
             self._is_closing = False
 
     def _update_cycle(self):
@@ -144,49 +178,56 @@ class TacticalPopout(QWidget):
 
     def _sync_telemetry(self, msg, val, dropping):
         if self._is_closing: return
-        self.title.setText(msg)
         self.sig_label.setText(f"SIGNAL: {int(val)}%")
         self.sig_icon.val = int(val)
-        self.title.adjustSize()
         self.sig_container.adjustSize()
-        self.sig_container.move(self.width() - self.sig_container.width() - 25, 15)
+        self.sig_container.move(self.width() - self.sig_container.width() - GLITCH_MARGIN - 20, GLITCH_MARGIN + 15)
 
     def paintEvent(self, event):
         p = QPainter(self)
         if not p.isActive(): return
         p.setRenderHint(QPainter.Antialiasing)
         
-        w, h = self.width(), self.height()
-        e = 25.0 # Notch size
+        m = GLITCH_MARGIN
+        w, h = self.width() - (m*2), self.height() - (m*2)
+        e = 25.0
         
+        # Create tactical notched path
         path = QPainterPath()
-        path.moveTo(e, 0); path.lineTo(w-e, 0); path.lineTo(w, e); path.lineTo(w, h-e)
-        path.lineTo(w-e, h); path.lineTo(e, h); path.lineTo(0, h-e); path.lineTo(0, e); path.closeSubpath()
+        path.moveTo(m+e, m); path.lineTo(m+w-e, m); path.lineTo(m+w, m+e)
+        path.lineTo(m+w, m+h-e); path.lineTo(m+w-e, m+h); path.lineTo(m+e, m+h)
+        path.lineTo(m, m+h-e); path.lineTo(m, m+e); path.closeSubpath()
         
         p.fillPath(path, QBrush(Qt.black))
 
+        # Failsafe: if pixmap is missing during paint, create it
         if self._bg_pixmap is None:
             self._bg_pixmap = theme.get_numpy_gradient(w, h)
-
+        
         if self._bg_pixmap:
             p.setClipPath(path)
-            p.drawPixmap(0, 0, self._bg_pixmap)
+            p.drawPixmap(m, m, self._bg_pixmap)
         
+        # Border
         p.setClipping(False)
-        p.setPen(QPen(QColor(theme.ACTIVE["hex"]), 2.5))
+        p.setPen(QPen(QColor(theme.ACTIVE.get("hex", "#FF1E1E")), 2.0))
         p.drawPath(path)
-        p.end()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._bg_pixmap = None 
-        self.title.move(25, 15)
-        self.close_btn.move(self.width() - self.close_btn.width() - 15, 
-                           self.height() - self.close_btn.height() - 15)
+        self.title.move(GLITCH_MARGIN + 25, GLITCH_MARGIN + 15)
+        self.content_area.setGeometry(self.rect())
+        self.close_btn.move(self.width() - self.close_btn.width() - GLITCH_MARGIN - 20, 
+                           self.height() - self.close_btn.height() - GLITCH_MARGIN - 20)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.close_btn.geometry().contains(event.position().toPoint()): return
+            pos = event.position().toPoint()
+            # Disable drag if clicking in content center
+            if pos.y() > GLITCH_MARGIN + 50 and pos.y() < self.height() - GLITCH_MARGIN - 50:
+                 return
             self.is_dragging = True
             self.drag_offset = event.position().toPoint()
             event.accept()
@@ -200,9 +241,7 @@ class TacticalPopout(QWidget):
                 nx = max(0, min(new_pos.x(), pr.width() - self.width()))
                 ny = max(0, min(new_pos.y(), pr.height() - self.height()))
                 self.move(nx, ny)
-            else:
-                self.move(new_pos)
-            event.accept()
+            else: self.move(new_pos)
 
     def mouseReleaseEvent(self, event):
         self.is_dragging = False
