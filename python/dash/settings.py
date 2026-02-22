@@ -120,24 +120,27 @@ class SettingsPanel(QFrame):
             
         self.inner_layout.addWidget(self.pages, 1)
 
-        # 7. FOOTER SECTION
+        # 7. FOOTER SECTION (Enlarged for tactile use)
         self.footer_container = QWidget()
         self.footer_layout = QHBoxLayout(self.footer_container)
         self.footer_layout.setContentsMargins(0, 0, 0, 10) 
-        self.footer_layout.setSpacing(15)
+        self.footer_layout.setSpacing(20)
         self.footer_layout.setAlignment(Qt.AlignCenter)
         
+        # Bigger buttons: 80x55
         self.prev_btn = CustomButton("<", self, small=True)
-        self.prev_btn.setFixedSize(50, 40)
+        self.prev_btn.setFixedSize(80, 55)
+        self.prev_btn.font_size = 24
         self.prev_btn.clicked.connect(self.prev_page)
         
         self.page_label = QLabel("1 / 5")
-        self.page_label.setFixedWidth(80)
+        self.page_label.setFixedWidth(100)
         self.page_label.setAlignment(Qt.AlignCenter)
-        self.page_label.setStyleSheet(f"color: {theme.ACTIVE['hex']}; font-family: 'Consolas'; font-size: 18px; background: none;")
+        self.page_label.setStyleSheet(f"color: {theme.ACTIVE['hex']}; font-family: 'Consolas'; font-size: 22px; font-weight: bold; background: none;")
         
         self.next_btn = CustomButton(">", self, small=True)
-        self.next_btn.setFixedSize(50, 40)
+        self.next_btn.setFixedSize(80, 55)
+        self.next_btn.font_size = 24
         self.next_btn.clicked.connect(self.next_page)
         
         self.footer_layout.addWidget(self.prev_btn)
