@@ -17,7 +17,6 @@ bool SocketServer::init() {
         return false;
     }
 
-    // Server socket must be non-blocking for accept() to poll
     int flags = fcntl(server_fd, F_GETFL, 0);
     fcntl(server_fd, F_SETFL, flags | O_NONBLOCK);
 
@@ -42,20 +41,13 @@ bool SocketServer::init() {
 
 void SocketServer::send_telemetry(const std::string& json_data) {
     if (client_fd != -1) {
+        // We append a newline so Python's .readline() can separate packets perfectly
         std::string packet = json_data + "\n";
         
-        // MSG_DONTWAIT: Don't let the engine hang if the GUI is slow
-        // MSG_NOSIGNAL: Don't crash the engine if the GUI is closed
         ssize_t sent = send(client_fd, packet.c_str(), packet.length(), MSG_NOSIGNAL | MSG_DONTWAIT);
         
         if (sent == -1) {
-            // Check if the failure is just a full buffer
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // Buffer is full. Do NOTHING. 
-                // Just return and let the engine finish its 1ms cycle.
-                return; 
-            } else {
-                // A real error happened (GUI was actually closed)
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
                 std::cout << "[ACE] Connection Lost (FD: " << client_fd << ")" << std::endl;
                 close(client_fd);
                 client_fd = -1;
@@ -65,61 +57,38 @@ void SocketServer::send_telemetry(const std::string& json_data) {
 }
 
 std::string SocketServer::poll_commands() {
-    // 1. ATTEMPT CONNECTION: Only if client_fd is exactly -1
     if (client_fd == -1) {
         int new_client = accept(server_fd, NULL, NULL);
-        
         if (new_client >= 0) {
-            // SUCCESS: We have a real connection
             client_fd = new_client;
-            
             int flags = fcntl(client_fd, F_GETFL, 0);
             fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
-            
-            // This will now only print ONCE because client_fd is no longer -1
             std::cout << "[ACE] Python GUI connected (FD: " << client_fd << ")" << std::endl;
         }
     }
 
-    // 2. READ DATA: Only if we have an active connection
     if (client_fd != -1) {
         char buffer[4096];
-        ssize_t bytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+        // We use recv with MSG_DONTWAIT to keep the engine loop fast
+        ssize_t bytes = recv(client_fd, buffer, sizeof(buffer) - 1, MSG_DONTWAIT);
         
         if (bytes > 0) {
             buffer[bytes] = '\0';
             return std::string(buffer);
         } 
         else if (bytes == 0) {
-            // DISCONNECT: Client closed the pipe
-            std::cout << "[ACE] Python GUI disconnected (FD: " << client_fd << ")" << std::endl;
+            std::cout << "[ACE] Python GUI disconnected" << std::endl;
             close(client_fd);
-            client_fd = -1; // Reset to -1 so we can accept a new connection
-        }
-        else {
-            // Error handling: Ignore "no data" (EAGAIN), close on real errors
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                close(client_fd);
-                client_fd = -1;
-            }
+            client_fd = -1;
         }
     }
-    
     return "";
 }
 
 void SocketServer::cleanup() {
-    if (client_fd != -1) {
-        close(client_fd);
-        client_fd = -1;
-    }
-    if (server_fd != -1) {
-        close(server_fd);
-        server_fd = -1;
-    }
+    if (client_fd != -1) { close(client_fd); client_fd = -1; }
+    if (server_fd != -1) { close(server_fd); server_fd = -1; }
     unlink(socket_path);
 }
 
-SocketServer::~SocketServer() {
-    cleanup();
-}
+SocketServer::~SocketServer() { cleanup(); }

@@ -1,58 +1,72 @@
 #include "logic.h"
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 Logic::Logic() : frame_count(0) {}
 Logic::~Logic() {}
 
 bool Logic::initialize() {
-    // We only need to init the input manager now
+    // Initialize InputManager (which handles our 4-port hub mapping)
     if (!input.initialize()) return false;
     return true;
 }
 
+// NEW: This resolves the compiler error in main.cpp
+void Logic::handle_command(const std::string& cmd) {
+    // Passes the socket command (e.g., "SET_SLOT|1|racing.json") to the remapper
+    input.handleCommand(cmd);
+}
+
 void Logic::run_iteration() {
     frame_count++;
-    input.update();
-    // Logic handles internal processing here. 
-    // Data is sent via the socket in main.cpp.
+    // Clear the SDL event queue, scrape USB data, and apply profile remapping
+    input.update(); 
 }
 
 std::string Logic::get_telemetry_json(uint64_t late_count) {
     std::stringstream ss;
     
-    // --- Added late_count to the top level of the JSON ---
+    // Set fixed precision for float sensors to keep JSON small but accurate
+    ss << std::fixed << std::setprecision(4);
+
+    // Global telemetry header
     ss << "{\"hb\":" << frame_count 
        << ",\"late\":" << late_count 
-       << ",\"slots\":[";
+       << ",\"slots\":{"; 
 
-    for (int i = 0; i < 4; i++) {
-        if (i < (int)input.getDeviceCount()) {
-            DeviceState state = input.getDeviceState(i);
-            ss << "{\"id\":" << i 
-               << ",\"name\":\"" << state.name << "\""
-               << ",\"conn\":true"
+    // Explicitly loop 1-4 to match your physical 4-port hub
+    for (int i = 1; i <= 4; i++) {
+        DeviceState state = input.getSlotState(i);
+        
+        ss << "\"" << i << "\":{";
+        ss << "\"conn\":" << (state.connected ? "true" : "false");
+        
+        if (state.connected) {
+            ss << ",\"name\":\"" << state.name << "\""
                << ",\"axes\":[";
             
-            // Add all 6 axes
-            for(int a=0; a<6; a++) {
+            // Output all 6 standard virtual axes
+            for(int a = 0; a < 6; a++) {
                 ss << (int)state.axes[a] << (a < 5 ? "," : "");
             }
             
             ss << "],\"btns\":[";
-            
-            // Add all 15 buttons as 0 or 1
-            for(int b=0; b<15; b++) {
+            // Output standard button set
+            for(int b = 0; b < 15; b++) {
                 ss << (state.buttons[b] ? "1" : "0") << (b < 14 ? "," : "");
             }
-            ss << "]}";
-        } else {
-            // Placeholder for disconnected slots to keep JSON structure consistent
-            ss << "{\"id\":" << i << ",\"conn\":false}";
+            ss << "]";
+
+            // NEW: Rigging for Motion Telemetry (Accel and Gyro)
+            ss << ",\"accel\":[" << state.accel[0] << "," << state.accel[1] << "," << state.accel[2] << "]";
+            ss << ",\"gyro\":[" << state.gyro[0] << "," << state.gyro[1] << "," << state.gyro[2] << "]";
         }
-        if (i < 3) ss << ",";
+        
+        ss << "}";
+        if (i < 4) ss << ","; // Comma between slot objects
     }
 
-    ss << "]}";
+    ss << "}}";
     return ss.str();
 }

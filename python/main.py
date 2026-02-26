@@ -28,7 +28,7 @@ from effects.animations import GLOBAL_TELEMETRY
 class LogicWorker(QThread):
     """
     Dedicated thread for high-speed socket polling.
-    Keeps the UI responsive by handling I/O and Logic updates separately.
+    Handles both receiving telemetry and sending commands to the C++ engine.
     """
     def __init__(self, comm, proc):
         super().__init__()
@@ -40,41 +40,48 @@ class LogicWorker(QThread):
         self.setPriority(QThread.TimeCriticalPriority)
         
         while self.running:
+            # Handle Connection
             if not self.comm.client:
                 if self.comm.connect():
-                    print("[ACE] Socket Connected.")
+                    print("[ACE] Socket Connected. Synchronizing profiles...")
+                    # Immediately sync C++ with current Python settings
+                    for cmd in self.proc.get_sync_commands():
+                        self.comm.send(cmd)
                 else:
-                    # Reset logic stats on connection failure
                     self.proc.current_hz = 0
                     self.proc.heartbeat = 0
                     time.sleep(0.5)
                     continue
             
-            # Receive raw binary/text from the C++ socket
+            # --- TWO-WAY IPC INTERACTION ---
+
+            # A. OUTBOUND: Check if Logic has commands (SET_SLOT, etc.) to send to C++
+            cmd = self.proc.pop_command()
+            if cmd:
+                self.comm.send(cmd)
+
+            # B. INBOUND: Receive telemetry from the C++ socket
             raw = self.comm.receive()
             if raw:
                 self.proc.update(raw)
             else:
-                # Minimal sleep to prevent 100% CPU usage while maintaining micro-latency
+                # Keep latency ultra-low without pegged CPU
                 time.sleep(0.0001)
 
 def run():
     # Execute system tweaks before starting Qt
     optimize_system()
     
-    # --- UI INITIALIZATION SEQUENCE ---
     app = QApplication(sys.argv)
     
     # CRITICAL: Initialize the Global Telemetry pulse in the Main Thread.
-    # This prevents the QObject thread-affinity error.
     GLOBAL_TELEMETRY.initialize()
-    # ----------------------------------
 
-    # Setup the communication and logic cores
+    # Setup core components
     comm = SocketClient("/tmp/xace.sock")
     proc = Logic()
     
-    # The Dashboard is the root controller for the entire UI (Settings, HUD, etc.)
+    # The Dashboard handles the UI and user input
     view = Dashboard()
     
     # Start the high-priority logic thread
@@ -82,7 +89,6 @@ def run():
     worker.start()
 
     # Main UI Refresh Timer (~60 FPS)
-    # This pushes the logic state into the dashboard for visual updates
     ui_timer = QTimer()
     ui_timer.timeout.connect(lambda: view.show_update(proc))
     ui_timer.start(16)
@@ -91,10 +97,10 @@ def run():
     def handle_exit(*args):
         print("\n[ACE] Terminating sequence initiated...")
         worker.running = False
-        worker.wait() # Ensure thread closes cleanly
+        worker.wait() 
         app.quit()
 
-    # Capture OS signals for graceful termination (Ctrl+C)
+    # Capture OS signals
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
 

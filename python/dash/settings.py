@@ -1,8 +1,7 @@
 import sys
-import random
 import numpy as np
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QWidget
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap, QPainter, QPainterPath
 import theme
 
@@ -11,7 +10,13 @@ from effects.animations import GLOBAL_TELEMETRY
 from widgets.frame import CustomFrame
 from widgets.button import CustomButton
 from widgets.signal import SignalIcon
+
+# Import all 5 modular Settings pages
 from dash.settings_page1 import SettingsPage1
+from dash.settings_page2 import SettingsPage2
+from dash.settings_page3 import SettingsPage3
+from dash.settings_page4 import SettingsPage4
+from dash.settings_page5 import SettingsPage5
 
 class SettingsPanel(QFrame):
     def __init__(self, parent=None):
@@ -44,36 +49,26 @@ class SettingsPanel(QFrame):
         self.header_layout.setContentsMargins(20, 10, 20, 0) 
         self.header_layout.setSpacing(0)
         
-        # LEFT SIDE: Dynamic Status
+        # LEFT: Status
         self.status_container = QWidget()
         self.status_vbox = QVBoxLayout(self.status_container)
         self.status_vbox.setContentsMargins(0, 0, 0, 0)
-        self.status_vbox.addSpacing(5) 
-        
-        # This label receives "CONNECTION STABLE" or "INITIALIZING" via telemetry
         self.status_label = QLabel("// INITIALIZING...")
-        self.status_label.setAttribute(Qt.WA_TranslucentBackground)
-        
+        self.status_vbox.addSpacing(5)
         self.status_vbox.addWidget(self.status_label)
         self.status_vbox.addStretch()
         
-        # CENTER: Main Title
+        # CENTER: Title
         self.header = QLabel("SETTINGS")
         self.header.setAlignment(Qt.AlignCenter)
-        self.header.setAttribute(Qt.WA_TranslucentBackground)
         
-        # RIGHT SIDE: Signal Status
+        # RIGHT: Signal
         self.sig_container = QWidget()
-        self.sig_container.setStyleSheet("background: transparent;")
         self.sig_layout = QHBoxLayout(self.sig_container)
         self.sig_layout.setContentsMargins(0, 0, 0, 0)
-        
         self.sig_icon = SignalIcon()
         self.sig_icon.setFixedSize(22, 22)
-        self.sig_icon.val = 95
-        
-        self.sig_pct = QLabel("SIGNAL: 95%")
-        
+        self.sig_pct = QLabel("SIGNAL: 0%")
         self.sig_layout.addWidget(self.sig_icon)
         self.sig_layout.addWidget(self.sig_pct)
 
@@ -82,26 +77,25 @@ class SettingsPanel(QFrame):
         self.header_layout.addWidget(self.sig_container, 1, Qt.AlignRight | Qt.AlignTop)
         self.inner_layout.addWidget(self.header_widget)
 
-        # 6. PAGE NAVIGATION (Stacked Widget)
+        # 6. PAGE NAVIGATION
         self.pages = QStackedWidget()
         self.pages.setStyleSheet("background: transparent; border: none;")
         self.page_titles = ["SETTINGS", "USER INTERFACE", "NETWORK", "SECURITY", "SYSTEM"]
         
-        # Load the custom Page 1
+        # Initialize instances
         self.p1 = SettingsPage1(self)
-        self.pages.addWidget(self.p1)
+        self.p2 = SettingsPage2(self)
+        self.p3 = SettingsPage3(self)
+        self.p4 = SettingsPage4(self)
+        self.p5 = SettingsPage5(self)
         
-        # Dummy pages for 2 through 5
-        self.dummy_labels = []
-        for i in range(1, 5):
-            page = QWidget()
-            l = QVBoxLayout(page)
-            msg = QLabel(f"TERMINAL {self.page_titles[i]}\n> STATUS: ONLINE")
-            msg.setAlignment(Qt.AlignCenter)
-            l.addWidget(msg)
-            self.pages.addWidget(page)
-            self.dummy_labels.append(msg)
-            
+        # Add to stack
+        self.pages.addWidget(self.p1)
+        self.pages.addWidget(self.p2)
+        self.pages.addWidget(self.p3)
+        self.pages.addWidget(self.p4)
+        self.pages.addWidget(self.p5)
+        
         self.inner_layout.addWidget(self.pages, 1)
 
         # 7. FOOTER SECTION
@@ -132,13 +126,9 @@ class SettingsPanel(QFrame):
         self.inner_layout.addWidget(self.footer_container)
         self.outer_layout.addWidget(self.content_frame)
 
-        # Apply initial theme
         self.refresh_theme()
 
-    # --- LOGIC METHODS ---
-
     def refresh_theme(self):
-        """Dynamic color refresh for all elements based on theme.ACTIVE"""
         h = theme.ACTIVE['hex']
         style = f"color: {h}; font-family: 'Consolas'; font-weight: bold; background: none; border: none;"
         
@@ -147,31 +137,29 @@ class SettingsPanel(QFrame):
         self.sig_pct.setStyleSheet(style + "font-size: 14px;")
         self.page_label.setStyleSheet(style + "font-size: 22px;")
         
+        # Refresh all child pages
+        for i in range(self.pages.count()):
+            page = self.pages.widget(i)
+            if hasattr(page, 'refresh_theme'):
+                page.refresh_theme()
+
         self.prev_btn.update()
         self.next_btn.update()
-        
-        for lbl in self.dummy_labels:
-            lbl.setStyleSheet(f"color: {h}; font-family: 'Consolas'; font-size: 20px; background: none;")
-        
-        if hasattr(self.p1, 'refresh_theme'): self.p1.refresh_theme()
-        if hasattr(self.sig_icon, 'refresh_theme'): self.sig_icon.refresh_theme()
-        
         self.content_frame.update()
         self.update()
 
     def _sync_telemetry(self, msg, val, dropping):
-        """Updates status text and signal strength from global broadcast"""
         self.status_label.setText(msg)
         self.sig_pct.setText(f"SIGNAL: {int(val)}%")
         self.sig_icon.val = int(val)
         self.sig_icon.update()
 
     def update_state(self, proc):
-        """Required for dashboard_panel.py logic"""
-        pass
+        curr = self.pages.currentWidget()
+        if hasattr(curr, 'update_state'):
+            curr.update_state(proc)
 
     def set_gradient_bg(self, width, height):
-        """Generates pixel data for the tactical background"""
         gradient = np.linspace(8, 22, height, dtype=np.uint8)
         pattern = np.repeat(gradient[:, np.newaxis], width, axis=1)
         image_array = np.stack((pattern, pattern, pattern), axis=-1)
@@ -179,31 +167,27 @@ class SettingsPanel(QFrame):
         self._bg_pixmap = QPixmap.fromImage(qimg)
 
     def paintEvent(self, event):
-        """Draws the custom notched background"""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        
-        rect = self.content_frame.geometry()
-        edge = 25.0 
-        
-        path = QPainterPath()
-        path.moveTo(rect.left() + edge, rect.top())
-        path.lineTo(rect.right() - edge, rect.top())
-        path.lineTo(rect.right(), rect.top() + edge)
-        path.lineTo(rect.right(), rect.bottom() - edge)
-        path.lineTo(rect.right() - edge, rect.bottom())
-        path.lineTo(rect.left() + edge, rect.bottom())
-        path.lineTo(rect.left(), rect.bottom() - edge)
-        path.lineTo(rect.left(), rect.top() + edge)
-        path.closeSubpath()
-        
-        painter.setClipPath(path)
-        painter.drawPixmap(self.rect(), self._bg_pixmap)
+        with QPainter(self) as painter:
+            painter.setRenderHint(QPainter.Antialiasing)
+            rect = self.content_frame.geometry()
+            edge = 25.0 
+            path = QPainterPath()
+            path.moveTo(rect.left() + edge, rect.top())
+            path.lineTo(rect.right() - edge, rect.top())
+            path.lineTo(rect.right(), rect.top() + edge)
+            path.lineTo(rect.right(), rect.bottom() - edge)
+            path.lineTo(rect.right() - edge, rect.bottom())
+            path.lineTo(rect.left() + edge, rect.bottom())
+            path.lineTo(rect.left(), rect.bottom() - edge)
+            path.lineTo(rect.left(), rect.top() + edge)
+            path.closeSubpath()
+            painter.setClipPath(path)
+            painter.drawPixmap(self.rect(), self._bg_pixmap)
 
     def update_page_ui(self):
-        index = self.pages.currentIndex()
-        self.header.setText(self.page_titles[index])
-        self.page_label.setText(f"{index + 1} / 5")
+        idx = self.pages.currentIndex()
+        self.header.setText(self.page_titles[idx])
+        self.page_label.setText(f"{idx + 1} / 5")
 
     def next_page(self):
         self.pages.setCurrentIndex((self.pages.currentIndex() + 1) % 5)
