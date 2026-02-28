@@ -1,63 +1,52 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <string>
-#include <vector>
 #include <cstdint>
+#include <cmath> // Added for M_PI support if needed elsewhere
 
-/**
- * 1. The "Raw Scrape" structure
- * This holds the direct output from SDL before any normalization.
- */
+// Reserved memory capacity
+constexpr int MAX_AXES = 50;     
+constexpr int MAX_BUTTONS = 100; 
+
 struct RawPortData {
-    // UPDATED: Changed from 'int' to 'int16_t' to match SDL3 Sint16 native output
-    int16_t axes[12] = {0};         
-    bool buttons[32] = {false};     
-    
-    // 0-2: Gyro (P,R,Y), 3-5: Accel (X,Y,Z) 
-    // We keep this order consistent for the InputManager math.
-    float motion[6] = {0.0f};       
+    int16_t axes[MAX_AXES] = {0};
+    bool buttons[MAX_BUTTONS] = {false};
+    float motion[6] = {0.0f};       // 0-2: Gyro (deg/s), 3-5: Accel (G)
     uint64_t timestamp = 0;
 };
 
-/**
- * 2. The Final State used by Logic/Dashboard
- * This is the structure your Python code and Dashboard will actually read.
- */
 struct DeviceState {
     bool connected = false;
     std::string name = "Unknown";
-    std::string path = "";          // Resolved USB Path (e.g., "1-1.2")
+    std::string path = "";          
     std::string guid = "";
 
-    // Processed values locked to 16-bit for the Python UI Bars
-    int16_t axes[12] = {0};
-    bool buttons[32] = {false};
+    int16_t axes[MAX_AXES] = {0};
+    bool buttons[MAX_BUTTONS] = {false};
     
-    // Scaled values (High-Fidelity PlayStation-style math)
-    float accel[3] = {0.0f};
-    float gyro[3] = {0.0f};
+    // Standardized Units for RC Control
+    float accel[3] = {0.0f}; // Units: G (1.0 = Earth Gravity)
+    float gyro[3] = {0.0f};  // Units: Degrees per Second (DPS)
 
-    // The raw data container (The "Original" data is kept here)
     RawPortData raw;
 };
 
-/**
- * InputReader Class
- * Handles the low-level SDL3 hardware interface.
- */
 class InputReader {
 public:
     InputReader(SDL_JoystickID id);
     ~InputReader();
-
-    // The heart of the hardware scrape
     void update();
-    
+
+    // Getters for the Socket/Manager
     const DeviceState& getState() const { return state; }
     SDL_JoystickID getInstanceId() const { return instance_id; }
+    int getActiveAxes() const { return active_axes; }
+    int getActiveButtons() const { return active_buttons; }
 
 private:
     SDL_Gamepad* gamepad = nullptr;
     SDL_JoystickID instance_id;
     DeviceState state;
+    int active_axes = 0;    // Hardware count clamped to MAX_AXES
+    int active_buttons = 0; // Hardware count clamped to MAX_BUTTONS
 };

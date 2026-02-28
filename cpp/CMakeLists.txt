@@ -17,6 +17,7 @@ add_executable(ace_engine
     src/logic/logic2.cpp
     src/input/input_read.cpp
     src/input/input_manage.cpp
+    src/input/input_tune.cpp
     src/shared/socket.cpp
 )
 

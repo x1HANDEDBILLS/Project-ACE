@@ -5,30 +5,55 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include <cmath>
+#include <algorithm>
 
 using json = nlohmann::json;
 
+// Per-slot smoothing and state (for up to 4 controllers)
+static float current_pitch[5] = {0.0f};
+static float current_roll[5]  = {0.0f};
+static float pitch_offset[5]  = {0.0f};
+static float roll_offset[5]   = {0.0f};
+static uint64_t last_timestamp[5] = {0};
+
+static float stg1_p[5] = {0.0f}, stg1_r[5] = {0.0f};
+static float stg2_p[5] = {0.0f}, stg2_r[5] = {0.0f};
+
 bool InputManager::initialize() {
-    // Initialize SDL3 Gamepad, Sensor, and Joystick subsystems
     if (!SDL_Init(SDL_INIT_GAMEPAD | SDL_INIT_SENSOR | SDL_INIT_JOYSTICK)) {
         return false;
     }
+
+    for (int i = 0; i < 5; i++) {
+        current_pitch[i] = current_roll[i] = 0.0f;
+        pitch_offset[i] = roll_offset[i] = 0.0f;
+        last_timestamp[i] = 0;
+        stg1_p[i] = stg1_r[i] = stg2_p[i] = stg2_r[i] = 0.0f;
+    }
+
+    tuningEngine = std::make_unique<InputTune>();
     scoutDevices();
     return true;
 }
 
 void InputManager::handleCommand(const std::string& cmd) {
-    // Protocol: "SET_SLOT|Slot#|ProfileName.json"
     std::stringstream ss(cmd);
-    std::string action, slotStr, profileName;
+    std::string action;
 
-    if (std::getline(ss, action, '|') && action == "SET_SLOT") {
-        if (std::getline(ss, slotStr, '|') && std::getline(ss, profileName, '|')) {
-            try {
-                int slot = std::stoi(slotStr);
-                loadProfile(slot, profileName);
-            } catch (...) {
-                std::cerr << "[ACE] Command Error: Invalid Slot/Format" << std::endl;
+    if (std::getline(ss, action, '|')) {
+        if (action == "SET_SLOT") {
+            std::string slotStr, profileName;
+            if (std::getline(ss, slotStr, '|') && std::getline(ss, profileName, '|')) {
+                try {
+                    int slot = std::stoi(slotStr);
+                    loadProfile(slot, profileName);
+                } catch (...) {}
+            }
+        }
+        else if (action == "CALIBRATE") {
+            int slot;
+            if (sscanf(cmd.c_str(), "CALIBRATE|%d", &slot) == 1) {
+                resetOrientation(slot);
             }
         }
     }
@@ -36,55 +61,47 @@ void InputManager::handleCommand(const std::string& cmd) {
 
 void InputManager::loadProfile(int slot, const std::string& profileName) {
     if (slot < 1 || slot > 4) return;
-
     std::string path = "profiles/" + profileName;
     std::ifstream file(path);
-
-    if (!file.is_open()) {
-        std::cerr << "[ACE] Profile Not Found: " << path << std::endl;
-        return;
-    }
+    if (!file.is_open()) return;
 
     try {
         json j;
         file >> j;
-
         ControlProfile& p = activeProfiles[slot];
-        p.profileName = profileName;
 
-        for (int i = 0; i < 12; i++) {
-            p.axisMap[i] = j["axis_map"][i];
-            p.inverted[i] = j["inversions"][i];
+        if (j.contains("axis_map")) {
+            auto amap = j["axis_map"].get<std::vector<int>>();
+            for (int i = 0; i < MAX_AXES; i++) {
+                p.axisMap[i] = (i < (int)amap.size()) ? amap[i] : i;
+            }
         }
-
-        for (int i = 0; i < 32; i++) {
-            p.buttonMap[i] = j["button_map"][i];
-        }
-
-        for (int i = 0; i < 6; i++) {
-            p.motionMap[i] = j["motion_map"][i];
-            p.motionInverted[i] = j["motion_inversions"][i];
-        }
-
-        std::cout << "[ACE] Slot " << slot << " configured with: " << profileName << std::endl;
-
-    } catch (const std::exception& e) {
-        std::cerr << "[ACE] JSON Error in " << profileName << ": " << e.what() << std::endl;
-    }
+        std::cout << "[MANAGER] Loaded Profile: " << profileName << std::endl;
+    } catch (...) {}
 }
 
 void InputManager::scoutDevices() {
     int count;
-    SDL_JoystickID* joysticks = SDL_GetGamepads(&count);
+    SDL_JoystickID* joysticks = SDL_GetJoysticks(&count);
     if (joysticks) {
         for (int i = 0; i < count; i++) {
+            bool alreadyMapped = false;
+            for(auto const& [sID, dev] : slots) {
+                if(dev->getInstanceId() == joysticks[i]) { alreadyMapped = true; break; }
+            }
+            if (alreadyMapped) continue;
+
             auto reader = std::make_unique<InputReader>(joysticks[i]);
-            int slot = getSlotFromPath(reader->getState().path);
+            int targetSlot = getSlotFromPath(reader->getState().path);
             
-            if (slot != -1) {
-                slots[slot] = std::move(reader);
-            } else {
-                unmapped_devices.push_back(std::move(reader));
+            if (targetSlot == 0) {
+                for (int s = 1; s <= 4; s++) {
+                    if (slots.find(s) == slots.end()) { targetSlot = s; break; }
+                }
+            }
+
+            if (targetSlot >= 1 && targetSlot <= 4) {
+                slots[targetSlot] = std::move(reader);
             }
         }
         SDL_free(joysticks);
@@ -93,81 +110,80 @@ void InputManager::scoutDevices() {
 
 int InputManager::getSlotFromPath(const std::string& path) {
     if (path.empty()) return 0;
-
-    size_t lastDot = path.find_last_of('.');
-    if (lastDot != std::string::npos && lastDot + 1 < path.length()) {
-        try {
-            std::string portStr = path.substr(lastDot + 1);
-            int port = std::stoi(portStr);
-            if (port >= 1 && port <= 4) return port;
-        } catch (...) {}
-    }
-
-    if (path.find("1-1") != std::string::npos) return 1;
-    if (path.find("1-2") != std::string::npos) return 2;
+    if (path.find(".1.1") != std::string::npos) return 1;
     return 0; 
+}
+
+void InputManager::resetOrientation(int slotID) {
+    if (slotID < 1 || slotID > 4) return;
+    pitch_offset[slotID] = current_pitch[slotID];
+    roll_offset[slotID] = current_roll[slotID];
+    std::cout << "[MANAGER] Calibrated Slot " << slotID << std::endl;
 }
 
 void InputManager::update() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_GAMEPAD_ADDED) {
-            auto reader = std::make_unique<InputReader>(event.gdevice.which);
-            int slot = getSlotFromPath(reader->getState().path);
-            if (slot != -1) {
-                slots[slot] = std::move(reader);
-            } else {
-                unmapped_devices.push_back(std::move(reader));
-            }
-        } else if (event.type == SDL_EVENT_GAMEPAD_REMOVED) {
-            for (auto it = slots.begin(); it != slots.end(); ++it) {
-                if (it->second->getInstanceId() == event.gdevice.which) {
-                    slots.erase(it);
-                    break;
-                }
-            }
-        }
+        if (event.type == SDL_EVENT_GAMEPAD_ADDED) scoutDevices(); 
     }
 
     for (auto& [slotID, device] : slots) {
-        device->update(); 
+        if (!device) continue;
         
+        device->update(); 
         DeviceState& state = const_cast<DeviceState&>(device->getState());
-        ControlProfile& p = activeProfiles[slotID];
+        
+        uint64_t now = state.raw.timestamp;
+        float dt = (last_timestamp[slotID] == 0) ? 0.004f : (float)(now - last_timestamp[slotID]) / 1e9f;
+        last_timestamp[slotID] = now;
 
-        // 1. AXIS ALIGNMENT (16-BIT)
-        for (int i = 0; i < 12; i++) {
-            int16_t rawVal = state.raw.axes[p.axisMap[i]];
-            if (p.inverted[i]) {
-                state.axes[i] = (rawVal == -32768) ? 32767 : -rawVal;
-            } else {
-                state.axes[i] = rawVal;
-            }
-        }
+        // PS4 Gyro/Accel Mapping (SDL3 standard)
+        float gx = state.raw.motion[0]; // Pitch rate
+        float gy = state.raw.motion[1]; // Yaw rate
+        float gz = state.raw.motion[2]; // Roll rate
 
-        // 2. BUTTON PASS-THROUGH
-        for (int i = 0; i < 32; i++) {
-            state.buttons[i] = state.raw.buttons[p.buttonMap[i]];
-        }
+        float ax = state.raw.motion[3]; // X (Roll axis)
+        float ay = state.raw.motion[4]; // Y (Pitch axis)
+        float az = state.raw.motion[5]; // Z (Vertical/Gravity)
 
-        // 3. ACCEL SCALING (9.81 m/s^2 -> 32765.0f)
-        for (int i = 0; i < 3; i++) {
-            float rawF = state.raw.motion[p.motionMap[i]]; 
-            float val = p.motionInverted[i] ? -rawF : rawF;
-            state.accel[i] = val * 3340.0f; 
-        }
+        // Gravity-referenced angles (flat = 0, up positive, down negative)
+        float raw_acc_p = std::atan2(-ay, std::sqrt(ax*ax + az*az)) * (180.0f / M_PI);
+        float raw_acc_r = std::atan2(ax, az) * (180.0f / M_PI);
 
-        // 4. GYRO SCALING (Rad/s -> High Res Float)
-        for (int i = 0; i < 3; i++) {
-            float rawF = state.raw.motion[p.motionMap[i + 3]]; 
-            float val = p.motionInverted[i + 3] ? -rawF : rawF;
-            state.gyro[i] = val * 10000.0f;
-        }
+        // Double exponential smoothing
+        stg1_p[slotID] = (raw_acc_p * 0.10f) + (stg1_p[slotID] * 0.90f);
+        stg1_r[slotID] = (raw_acc_r * 0.10f) + (stg1_r[slotID] * 0.90f);
+        stg2_p[slotID] = (stg1_p[slotID] * 0.10f) + (stg2_p[slotID] * 0.90f);
+        stg2_r[slotID] = (stg1_r[slotID] * 0.10f) + (stg2_r[slotID] * 0.90f);
+
+        // Magnitude gate
+        float mag = std::sqrt(ax*ax + ay*ay + az*az);
+        float trust = (std::abs(mag - 1.0f) < 0.15f) ? 0.04f : 0.0f;
+
+        // Complementary filter
+        current_pitch[slotID] = 0.96f * (current_pitch[slotID] + gx * dt) + (trust * stg2_p[slotID]);
+        current_roll[slotID]  = 0.96f * (current_roll[slotID]  + gz * dt) + (trust * stg2_r[slotID]);
+
+        // Calibrated output (subtract flat offset)
+        float cp = current_pitch[slotID] - pitch_offset[slotID];
+        float cr = current_roll[slotID]  - roll_offset[slotID];
+
+        cp = std::clamp(cp, -90.0f, 90.0f);
+        cr = std::clamp(cr, -90.0f, 90.0f);
+
+        // Scale to full 16-bit range
+        state.gyro[0] = static_cast<int16_t>((cp / 90.0f) * 32767.0f);
+        state.gyro[1] = static_cast<int16_t>(gy);  // Raw yaw rate (unchanged)
+        state.gyro[2] = static_cast<int16_t>((cr / 90.0f) * 32767.0f);
+
+        for (int i = 0; i < 3; i++) state.accel[i] = state.raw.motion[i + 3]; 
+
+        // Apply axis tuning (deadzone, sens, expo) - unchanged
+        tuningEngine->applyTuning(state, activeProfiles[slotID]);
     }
 }
 
 DeviceState InputManager::getSlotState(int slot) const {
     auto it = slots.find(slot);
-    if (it != slots.end()) return it->second->getState();
-    return DeviceState();
+    return (it != slots.end() && it->second) ? it->second->getState() : DeviceState();
 }

@@ -20,7 +20,8 @@ def optimize_system():
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 # 2. HUD & LOGIC IMPORTS
-from shared.socket import SocketClient
+# We import the GLOBAL_SOCKET instance created at the bottom of your socket.py
+from shared.socket import GLOBAL_SOCKET 
 from logic.logic import Logic
 from dash.dashboard import Dashboard
 from effects.animations import GLOBAL_TELEMETRY
@@ -63,6 +64,7 @@ class LogicWorker(QThread):
             # B. INBOUND: Receive telemetry from the C++ socket
             raw = self.comm.receive()
             if raw:
+                # Update the logic object with the freshest C++ data
                 self.proc.update(raw)
             else:
                 # Keep latency ultra-low without pegged CPU
@@ -78,7 +80,8 @@ def run():
     GLOBAL_TELEMETRY.initialize()
 
     # Setup core components
-    comm = SocketClient("/tmp/xace.sock")
+    # We use the shared GLOBAL_SOCKET instead of creating a new SocketClient
+    comm = GLOBAL_SOCKET 
     proc = Logic()
     
     # The Dashboard handles the UI and user input
@@ -90,6 +93,7 @@ def run():
 
     # Main UI Refresh Timer (~60 FPS)
     ui_timer = QTimer()
+    # Updated: We pass the 'proc' (Logic) object to the view's show_update
     ui_timer.timeout.connect(lambda: view.show_update(proc))
     ui_timer.start(16)
 

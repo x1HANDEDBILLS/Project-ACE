@@ -1,5 +1,6 @@
 import socket
 import os
+import json
 
 class SocketClient:
     def __init__(self, path="/tmp/xace.sock"):
@@ -67,6 +68,16 @@ class SocketClient:
             self.disconnect()
             return None
 
+    def get_telemetry(self):
+        """Helper to get the raw frame converted into a Python Dictionary."""
+        frame = self.receive()
+        if frame:
+            try:
+                return json.loads(frame)
+            except json.JSONDecodeError:
+                return None
+        return None
+
     def disconnect(self):
         """Safely closes the socket connection."""
         if self.client:
@@ -75,3 +86,6 @@ class SocketClient:
             except: 
                 pass
             self.client = None
+
+# Global instance for easy access across other files
+GLOBAL_SOCKET = SocketClient()

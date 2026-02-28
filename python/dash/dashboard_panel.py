@@ -5,7 +5,7 @@ from dash.panel_buttons import PanelButtons
 from widgets.popout import TacticalPopout 
 from dash.settings import SettingsPanel 
 from input.input_read import InputPanel 
-from input.input_tune import InputTunePanel # <--- NEW IMPORT
+from input.input_tune import InputTunePanel 
 import theme
 
 class DashboardPanel(QWidget):
@@ -23,9 +23,10 @@ class DashboardPanel(QWidget):
         # 2. MAIN SHIELD (The dimming layer for all large panels)
         self.shield = QFrame(self)
         self.shield.hide()
-        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        self.shield.setStyleSheet("background-color: rgba(0, 0, 0, 160);")
 
-        # 3. PANELS (Skeletons)
+        # 3. PANELS (The UI Modules)
+        # These are all parented to the shield so they appear centered over the HUD
         self.settings_gui = SettingsPanel(self.shield)
         self.settings_gui.setFixedSize(834, 600)
         self.settings_gui.hide()
@@ -34,11 +35,12 @@ class DashboardPanel(QWidget):
         self.input_gui.setFixedSize(834, 600)
         self.input_gui.hide()
 
-        self.tune_gui = InputTunePanel(self.shield) # <--- NEW INITIALIZATION
+        self.tune_gui = InputTunePanel(self.shield) 
         self.tune_gui.setFixedSize(834, 600)
+        self.tune_gui.setObjectName("InputTuning")
         self.tune_gui.hide()
 
-        # 4. POPOUT DEDICATED SHIELD
+        # 4. POPOUT DEDICATED SHIELD (For Theme Selector)
         self.popout_shield = QFrame(self)
         self.popout_shield.hide()
         self.popout_shield.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
@@ -65,14 +67,16 @@ class DashboardPanel(QWidget):
         self.button_grid.back_btn.clicked.connect(self.smart_back)
         self.button_grid.inner_settings_btn.clicked.connect(self.toggle_settings_gui)
         self.button_grid.input_btn.clicked.connect(self.toggle_input_gui)
-        self.button_grid.tune_btn.clicked.connect(self.toggle_tune_gui) # <--- NEW CONNECTION
+        self.button_grid.tune_btn.clicked.connect(self.toggle_tune_gui)
 
+        # --- STATE MANAGEMENT ---
         self.sidebar_open = False
         self.settings_open = False
         self.input_open = False 
-        self.tune_open = False # <--- NEW STATE
+        self.tune_open = False 
         self.theme_open = False
         
+        # --- ANIMATIONS ---
         self.anim_side = QPropertyAnimation(self.sidebar, b"pos")
         self.anim_side.setDuration(250)
         self.anim_side.setEasingCurve(QEasingCurve.OutCubic)
@@ -87,28 +91,36 @@ class DashboardPanel(QWidget):
         """)
 
     def refresh_theme(self):
+        """Propagates theme changes to all sub-panels."""
         self.apply_sidebar_style()
         self.settings_btn.update()
         if hasattr(self.button_grid, 'refresh_theme'): self.button_grid.refresh_theme()
         if hasattr(self.settings_gui, 'refresh_theme'): self.settings_gui.refresh_theme()
         if hasattr(self.input_gui, 'refresh_theme'): self.input_gui.refresh_theme()
-        if hasattr(self.tune_gui, 'refresh_theme'): self.tune_gui.refresh_theme() # <--- NEW REFRESH
+        if hasattr(self.tune_gui, 'refresh_theme'): self.tune_gui.refresh_theme()
         self.update()
 
     def update_panel(self, proc):
-        if self.settings_open: self.settings_gui.update_state(proc)
-        if self.input_open: self.input_gui.update_state(proc)
-        if self.tune_open: self.tune_gui.update_state(proc) # <--- DATA FLOW FOR TUNE
+        """The high-speed data bridge. Feeds the active panel with C++ telemetry."""
+        if self.settings_open: 
+            self.settings_gui.update_state(proc)
+        
+        if self.input_open: 
+            self.input_gui.update_state(proc)
+        
+        if self.tune_open: 
+            # We pass proc.state which contains the raw/tuned axis lists
+            self.tune_gui.update_state(proc.state)
 
     def update_panel_positions(self):
+        """Centers the 834x600 panels based on current sidebar state."""
         w, h = self.width(), self.height()
         available_w = w - self.sidebar_width if self.sidebar_open else w
         target_x = (available_w - 834) // 2
         target_y = (h - 600) // 2
         
-        if self.settings_gui: self.settings_gui.move(target_x, target_y)
-        if self.input_gui: self.input_gui.move(target_x, target_y)
-        if self.tune_gui: self.tune_gui.move(target_x, target_y) # <--- NEW POSITIONING
+        for gui in [self.settings_gui, self.input_gui, self.tune_gui]:
+            if gui: gui.move(target_x, target_y)
 
     def toggle_sidebar(self):
         w, h = self.width(), self.height()
@@ -154,7 +166,7 @@ class DashboardPanel(QWidget):
         self.update_panel_positions()
 
     def toggle_tune_gui(self):
-        """ Toggles the Input Tuning panel with mutual exclusion """
+        """Activates the 12-axis calibration interface."""
         if not self.tune_open:
             if self.settings_open: self.toggle_settings_gui()
             if self.input_open: self.toggle_input_gui()
@@ -167,6 +179,7 @@ class DashboardPanel(QWidget):
         self.update_panel_positions()
 
     def smart_back(self):
+        """Hierarchical back button logic."""
         if self.theme_open:
             self.toggle_theme_panel()
         elif self.tune_open:
@@ -197,10 +210,11 @@ class DashboardPanel(QWidget):
         self.settings_btn.move(w - self.settings_btn.width() - 10, 10)
         self.shield.setGeometry(0, 0, w, h)
         self.popout_shield.setGeometry(0, 0, w, h)
-        if self.sidebar_open:
-            self.sidebar.setGeometry(w - self.sidebar_width, 0, self.sidebar_width, h)
-        else:
-            self.sidebar.setGeometry(w, 0, self.sidebar_width, h)
+        
+        # Maintain sidebar position during resize
+        side_x = w - self.sidebar_width if self.sidebar_open else w
+        self.sidebar.setGeometry(side_x, 0, self.sidebar_width, h)
+        
         if event: super().resizeEvent(event)
 
     def _reset_theme_state(self):

@@ -38,20 +38,14 @@ class Dashboard(QMainWindow):
 
     def refresh_theme(self):
         """ 
-        SMART REFRESH: This is called by theme.py automatically 
-        whenever 'Save Theme Color' is pressed.
+        SMART REFRESH: Triggered when theme colors change.
         """
-        # 1. Clear the old background cache
         self._bg_cache = None
-        
-        # 2. Force a new gradient generation
         self._bg_cache = theme.get_numpy_gradient(self.width(), self.height())
         
-        # 3. If the panel has its own refresh logic, trigger it
         if hasattr(self.panel, 'refresh_theme'):
             self.panel.refresh_theme()
             
-        # 4. Redraw the whole window
         self.update()
 
     def attach_widget(self, widget):
@@ -59,12 +53,10 @@ class Dashboard(QMainWindow):
         self.main_layout.insertWidget(self.main_layout.count() - 1, widget)
 
     def resizeEvent(self, event):
-        """ Generate the NumPy gradient ONLY when window size changes """
         self._bg_cache = theme.get_numpy_gradient(self.width(), self.height())
         super().resizeEvent(event)
 
     def paintEvent(self, event):
-        """ Draws the pre-calculated pixmap with Pi 4 safety """
         p = QPainter(self)
         try:
             if self._bg_cache:
@@ -72,17 +64,20 @@ class Dashboard(QMainWindow):
         finally:
             p.end() 
 
-    def show_update(self, proc): # Renamed from show to avoid confusion with QWidget.show()
-        """ MAIN UPDATE BRIDGE """
+    def show_update(self, proc): 
+        """ 
+        MAIN UPDATE BRIDGE 
+        This is the heartbeat of the UI.
+        """
+        # 1. Update the main Dashboard Panel (HUD, Hz, Signal)
         if hasattr(self, 'panel'):
             self.panel.update_panel(proc)
         
-        for i in range(self.main_layout.count()):
-            item = self.main_layout.itemAt(i)
-            if item and item.widget():
-                widget = item.widget()
-                if hasattr(widget, 'update_state'):
-                    widget.update_state(proc)
+        # 2. Update the Tuning Panel specifically
+        # We look for the panel inside the DashboardPanel layers
+        if hasattr(self.panel, 'tuning_panel'):
+            # proc.state contains the 'raw_axes' and 'tuned_axes' dict
+            self.panel.tuning_panel.update_state(proc.state)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape: 

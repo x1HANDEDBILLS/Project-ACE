@@ -7,7 +7,8 @@
 
 class SocketServer {
 private:
-    int server_fd, client_fd;
+    int server_fd = -1;
+    int client_fd = -1;
     sockaddr_un address;
     const char* socket_path = "/tmp/xace.sock";
 

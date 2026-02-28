@@ -164,9 +164,10 @@ class TacticalPopout(QWidget):
         self.closed_manually.emit()
 
     def _finalize_anim(self):
+        """Clean up after the sliding animation finishes."""
         if self._is_closing:
             self.hide()
-            if self.parent(): self.parent().hide()
+            
             self._is_closing = False
 
     def _update_cycle(self):
