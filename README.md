@@ -1,27 +1,54 @@
-# PROJECT ACE: Adaptive Control Engine
+# Project ACE — Adaptive Control Engine
 
-ACE is a high-performance ground control station and flight logic engine designed for the Raspberry Pi 4. It features a custom **420,000 baud** CRSF link, real-time telemetry parsing (NOMAD), and a high-frequency (1kHz) stick input loop.
+**ACE** is a powerful, ultra-responsive ground control system built specifically for the Raspberry Pi 4.
 
-## Key Features
-* **NOMAD Telemetry:** Real-time parsing of CRSF frames (Link Stats, Battery, GPS).
-* **High-Speed Link:** 420k Baud synchronization optimized for ELRS/Crossfire.
-* **CPU Pinning:** Dedicated core isolation for hardware threads to ensure 0ms jitter.
-* **Adaptive Theme Engine:** Dynamic UI scaling and color profiles (Cyan, Red, Green, Amber).
-* **Split-Mixer Logic:** Advanced control surface mixing for complex airframes.
+It delivers extremely fast and precise control for RC planes, drones, helicopters, and cars using ExpressLRS or Crossfire radios.
 
-## Hardware Requirements
-* **Host:** Raspberry Pi 4 / Compute Module 4
-* **UART:** ttyAMA5 (GPIO 12/13)
-* **Protocol:** CRSF (ExpressLRS / Crossfire)
+### What Makes ACE Special
 
-## Build Instructions
+- **Lightning-Fast Response**  
+  Runs at 2000 times per second (2000 Hz) with almost zero delay — giving you the smoothest and most precise stick feel possible.
+
+- **Super Fast Radio Link**  
+  Uses a custom high-speed 420,000 baud connection to your ExpressLRS or Crossfire module for the lowest possible latency.
+
+- **Smart Mixing Engine**  
+  Advanced mixing system that handles even complex aircraft and control surfaces with ease.
+
+- **Beautiful & Easy-to-Use Interface**  
+  Clean, modern touchscreen-friendly display with multiple color themes (Cyan, Red, Green, Amber) that you can change on the fly.
+
+- **Full Support for Multiple Vehicles**  
+  Dedicated screens and tuning pages for:
+  - Airplanes
+  - Drones / Multirotors
+  - Helicopters
+  - Cars
+
+  Each vehicle gets its own dashboard, easy 5-step tuning wizards, and custom RC mapping.
+
+- **Highly Tunable Controls**  
+  Full adjustment for deadzone, expo, rates, endpoints, and more — all with real-time feedback.
+
+- **Rock-Solid Performance**  
+  Designed from the ground up to run smoothly with minimal jitter, even under heavy load.
+
+### Hardware You Need
+
+- Raspberry Pi 4 or Compute Module 4
+- ExpressLRS or Crossfire radio module connected to GPIO 12 & 13
+- Optional: Touchscreen or HDMI monitor
+
+### How to Install & Run
+
+1. Open a terminal on your Raspberry Pi
+2. Run these commands:
+
 ```bash
 mkdir build && cd build
 cmake ..
 make -j4
+
 export DISPLAY=:0
 export QT_QPA_PLATFORM=xcb
-sudo -E /home/user/ACE/build/ACE
-
-```
-```
+sudo -E ./ACE
