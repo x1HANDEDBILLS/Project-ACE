@@ -37,7 +37,7 @@ It delivers extremely fast and precise control for RC planes, drones, helicopter
 
 - Raspberry Pi 4 or Compute Module 4
 - ExpressLRS or Crossfire radio module connected to GPIO 12 & 13
-- Optional: Touchscreen or HDMI monitor
+- Touchscreen or HDMI monitor
 
 ### How to Install & Run
 
