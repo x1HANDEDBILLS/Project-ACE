@@ -6,7 +6,7 @@
 
 #define MAX_AXES 8
 #define MAX_BUTTONS 32
-#define LOGIC_HZ 2000
+#define LOGIC_HZ 1000
 #define UI_REFRESH_MS 16
 #define ISOLATED_CORE 3
 #define RT_PRIORITY 80
