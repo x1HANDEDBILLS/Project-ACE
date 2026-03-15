@@ -1,0 +1,240 @@
+.
+├── .clang-format
+├── CMakeLists.txt
+├── .gitignore
+├── include
+│   ├── common_constants.h
+│   ├── Core
+│   │   └── app_state.h
+│   ├── dash
+│   │   ├── dashboard_panel.h
+│   │   ├── input_read_page1.h
+│   │   ├── input_read_page2.h
+│   │   ├── input_read_page3.h
+│   │   ├── input_read_page4.h
+│   │   ├── input_read_page5.h
+│   │   ├── input_read_panel.h
+│   │   ├── panel_buttons.h
+│   │   ├── settings_page1.h
+│   │   └── settings_panel.h
+│   ├── input
+│   │   ├── device_state.h
+│   │   ├── input_manage.h
+│   │   ├── input_read.h
+│   │   └── input_tune.h
+│   ├── logic
+│   │   └── logic.h
+│   ├── nlohmann
+│   │   └── json.hpp
+│   ├── profiles
+│   │   ├── profile_manager.h
+│   │   └── profile_panel.h
+│   ├── protocols
+│   │   └── nomad_daemon_link.h
+│   ├── rc_type
+│   │   ├── rc_type_page1.h
+│   │   ├── rc_type_panel.h
+│   │   └── rc_type_selector.h
+│   ├── theme
+│   │   └── theme.h
+│   ├── vehicles
+│   │   ├── car
+│   │   │   ├── input_tune_car_page1.h
+│   │   │   ├── input_tune_car_page2.h
+│   │   │   ├── input_tune_car_page3.h
+│   │   │   ├── input_tune_car_page4.h
+│   │   │   ├── input_tune_car_page5.h
+│   │   │   ├── input_tune_car_panel.h
+│   │   │   ├── main_car_dash.h
+│   │   │   ├── rc_map_car_panel.h
+│   │   │   ├── rc_tune_car_page1.h
+│   │   │   ├── rc_tune_car_page2.h
+│   │   │   ├── rc_tune_car_page3.h
+│   │   │   ├── rc_tune_car_page4.h
+│   │   │   ├── rc_tune_car_page5.h
+│   │   │   └── rc_tune_car_panel.h
+│   │   ├── drone
+│   │   │   ├── input_tune_drone_page1.h
+│   │   │   ├── input_tune_drone_page2.h
+│   │   │   ├── input_tune_drone_page3.h
+│   │   │   ├── input_tune_drone_page4.h
+│   │   │   ├── input_tune_drone_page5.h
+│   │   │   ├── input_tune_drone_panel.h
+│   │   │   ├── main_drone_dash.h
+│   │   │   ├── rc_map_drone_panel.h
+│   │   │   ├── rc_tune_drone_page1.h
+│   │   │   ├── rc_tune_drone_page2.h
+│   │   │   ├── rc_tune_drone_page3.h
+│   │   │   ├── rc_tune_drone_page4.h
+│   │   │   ├── rc_tune_drone_page5.h
+│   │   │   └── rc_tune_drone_panel.h
+│   │   ├── heli
+│   │   │   ├── input_tune_heli_page1.h
+│   │   │   ├── input_tune_heli_page2.h
+│   │   │   ├── input_tune_heli_page3.h
+│   │   │   ├── input_tune_heli_page4.h
+│   │   │   ├── input_tune_heli_page5.h
+│   │   │   ├── input_tune_heli_panel.h
+│   │   │   ├── main_heli_dash.h
+│   │   │   ├── rc_map_heli_panel.h
+│   │   │   ├── rc_tune_heli_page1.h
+│   │   │   ├── rc_tune_heli_page2.h
+│   │   │   ├── rc_tune_heli_page3.h
+│   │   │   ├── rc_tune_heli_page4.h
+│   │   │   ├── rc_tune_heli_page5.h
+│   │   │   └── rc_tune_heli_panel.h
+│   │   └── plane
+│   │       ├── input_tune_plane.h
+│   │       ├── input_tune_plane_page1.h
+│   │       ├── input_tune_plane_page2.h
+│   │       ├── input_tune_plane_page3.h
+│   │       ├── input_tune_plane_page4.h
+│   │       ├── input_tune_plane_page5.h
+│   │       ├── input_tune_plane_panel.h
+│   │       ├── main_plane_dash.h
+│   │       ├── rc_map_plane.h
+│   │       ├── rc_map_plane_page1.h
+│   │       ├── rc_map_plane_page2.h
+│   │       ├── rc_map_plane_page3.h
+│   │       ├── rc_map_plane_page4.h
+│   │       ├── rc_map_plane_page5.h
+│   │       ├── rc_map_plane_panel.h
+│   │       ├── rc_tune_plane_page1.h
+│   │       ├── rc_tune_plane_page2.h
+│   │       ├── rc_tune_plane_page3.h
+│   │       ├── rc_tune_plane_page4.h
+│   │       ├── rc_tune_plane_page5.h
+│   │       └── rc_tune_plane_panel.h
+│   ├── widgets
+│   │   ├── button.h
+│   │   ├── frame.h
+│   │   ├── gauge.h
+│   │   ├── keyboard.h
+│   │   ├── keypad.h
+│   │   ├── source_selector.h
+│   │   └── status_bar.h
+│   └── windows
+│       └── mainwindow.h
+├── LICENSE
+├── manifest.txt
+├── README.md
+├── source_files.txt
+├── src
+│   ├── Core
+│   │   ├── app_state.cpp
+│   │   └── profile_manager.cpp
+│   ├── GUI
+│   │   ├── dash
+│   │   │   ├── dashboard_panel.cpp
+│   │   │   ├── input_read_page1.cpp
+│   │   │   ├── input_read_page2.cpp
+│   │   │   ├── input_read_page3.cpp
+│   │   │   ├── input_read_page4.cpp
+│   │   │   ├── input_read_page5.cpp
+│   │   │   ├── input_read_panel.cpp
+│   │   │   ├── main_car_dash.cpp
+│   │   │   ├── main_drone_dash.cpp
+│   │   │   ├── main_heli_dash.cpp
+│   │   │   ├── main_plane_dash.cpp
+│   │   │   ├── panel_buttons.cpp
+│   │   │   ├── settings_page1.cpp
+│   │   │   └── settings_panel.cpp
+│   │   ├── profiles
+│   │   │   └── profile_panel.cpp
+│   │   ├── rc_type
+│   │   │   ├── rc_type_page1.cpp
+│   │   │   ├── rc_type_panel.cpp
+│   │   │   └── rc_type_selector.cpp
+│   │   ├── theme
+│   │   │   └── theme.cpp
+│   │   ├── vehicles
+│   │   │   ├── car
+│   │   │   │   ├── input_tune_car_page1.cpp
+│   │   │   │   ├── input_tune_car_page2.cpp
+│   │   │   │   ├── input_tune_car_page3.cpp
+│   │   │   │   ├── input_tune_car_page4.cpp
+│   │   │   │   ├── input_tune_car_page5.cpp
+│   │   │   │   ├── input_tune_car_panel.cpp
+│   │   │   │   ├── rc_map_car_panel.cpp
+│   │   │   │   ├── rc_tune_car_page1.cpp
+│   │   │   │   ├── rc_tune_car_page2.cpp
+│   │   │   │   ├── rc_tune_car_page3.cpp
+│   │   │   │   ├── rc_tune_car_page4.cpp
+│   │   │   │   ├── rc_tune_car_page5.cpp
+│   │   │   │   └── rc_tune_car_panel.cpp
+│   │   │   ├── drone
+│   │   │   │   ├── input_tune_drone_page1.cpp
+│   │   │   │   ├── input_tune_drone_page2.cpp
+│   │   │   │   ├── input_tune_drone_page3.cpp
+│   │   │   │   ├── input_tune_drone_page4.cpp
+│   │   │   │   ├── input_tune_drone_page5.cpp
+│   │   │   │   ├── input_tune_drone_panel.cpp
+│   │   │   │   ├── rc_map_drone_panel.cpp
+│   │   │   │   ├── rc_tune_drone_page1.cpp
+│   │   │   │   ├── rc_tune_drone_page2.cpp
+│   │   │   │   ├── rc_tune_drone_page3.cpp
+│   │   │   │   ├── rc_tune_drone_page4.cpp
+│   │   │   │   ├── rc_tune_drone_page5.cpp
+│   │   │   │   └── rc_tune_drone_panel.cpp
+│   │   │   ├── heli
+│   │   │   │   ├── input_tune_heli_page1.cpp
+│   │   │   │   ├── input_tune_heli_page2.cpp
+│   │   │   │   ├── input_tune_heli_page3.cpp
+│   │   │   │   ├── input_tune_heli_page4.cpp
+│   │   │   │   ├── input_tune_heli_page5.cpp
+│   │   │   │   ├── input_tune_heli_panel.cpp
+│   │   │   │   ├── rc_map_heli_panel.cpp
+│   │   │   │   ├── rc_tune_heli_page1.cpp
+│   │   │   │   ├── rc_tune_heli_page2.cpp
+│   │   │   │   ├── rc_tune_heli_page3.cpp
+│   │   │   │   ├── rc_tune_heli_page4.cpp
+│   │   │   │   ├── rc_tune_heli_page5.cpp
+│   │   │   │   └── rc_tune_heli_panel.cpp
+│   │   │   └── plane
+│   │   │       ├── input_tune_plane_page1.cpp
+│   │   │       ├── input_tune_plane_page2.cpp
+│   │   │       ├── input_tune_plane_page3.cpp
+│   │   │       ├── input_tune_plane_page4.cpp
+│   │   │       ├── input_tune_plane_page5.cpp
+│   │   │       ├── input_tune_plane_panel.cpp
+│   │   │       ├── rc_map_plane_page1.cpp
+│   │   │       ├── rc_map_plane_page2.cpp
+│   │   │       ├── rc_map_plane_page3.cpp
+│   │   │       ├── rc_map_plane_page4.cpp
+│   │   │       ├── rc_map_plane_page5.cpp
+│   │   │       ├── rc_map_plane_panel.cpp
+│   │   │       ├── rc_tune_plane_page1.cpp
+│   │   │       ├── rc_tune_plane_page2.cpp
+│   │   │       ├── rc_tune_plane_page3.cpp
+│   │   │       ├── rc_tune_plane_page4.cpp
+│   │   │       ├── rc_tune_plane_page5.cpp
+│   │   │       └── rc_tune_plane_panel.cpp
+│   │   ├── widgets
+│   │   │   ├── button.cpp
+│   │   │   ├── frame.cpp
+│   │   │   ├── gauge.cpp
+│   │   │   ├── keyboard.cpp
+│   │   │   ├── keypad.cpp
+│   │   │   ├── source_selector.h
+│   │   │   └── status_bar.cpp
+│   │   └── windows
+│   │       └── mainwindow.cpp
+│   ├── input
+│   │   ├── input_manage.cpp
+│   │   └── input_read.cpp
+│   ├── logic
+│   │   └── logic.cpp
+│   ├── main.cpp
+│   ├── protocols
+│   │   ├── crsf
+│   │   │   ├── crsf_encoder.cpp
+│   │   │   └── crsf_telemetry.cpp
+│   │   ├── nomad_client.cpp
+│   │   └── nomad_daemon_internal.cpp
+│   └── vehicles
+│       └── plane
+│           ├── input_tune_plane.cpp
+│           └── rc_map_plane.cpp
+└── tree.txt
+
+38 directories, 200 files
