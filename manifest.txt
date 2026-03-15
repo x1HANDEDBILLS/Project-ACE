@@ -1,0 +1,25 @@
+# PROJECT ACE: SYSTEM DEPENDENCIES & ENVIRONMENT
+# Generated: 2026-03-15
+
+## 1. Operating System
+- OS: Debian Trixie (Testing) / Raspberry Pi OS 64-bit
+- Architecture: aarch64 (ARMv8)
+
+## 2. System Packages (Install via APT)
+- Build Tools: build-essential, cmake, ninja-build, clang-format
+- Qt6 Framework: qt6-base-dev, libqt6widgets6, libqt6gui6, libqt6core6
+- Graphics: libx11-dev, libxcb1-dev, libxkbcommon-dev, libopengl0, libegl1
+- Logic/Math: libstdc++6, libatomic1
+
+## 3. Manual / Custom Libraries
+- SDL3: Compiled from source (Linked via /usr/local/lib/libSDL3.so.0)
+  * Purpose: High-performance Gamepad/Joystick input.
+
+## 4. Hardware Requirements
+- UART: /dev/ttyAMA5 (GPIO 12/13)
+- Baud Rate: 420,000 (Custom Termios2 bitmask)
+- CPU: Raspberry Pi 4 (Core 3 isolated for Serial Thread)
+
+## 5. Environment Variables (Required for GUI)
+- DISPLAY=:0
+- QT_QPA_PLATFORM=xcb

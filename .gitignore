@@ -1,0 +1,9 @@
+build/
+bin/
+*.o
+*.a
+*.so
+.vscode/
+*.user
+__pycache__/
+.DS_Store
