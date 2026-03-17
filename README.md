@@ -7,7 +7,7 @@ It delivers extremely fast and precise control for RC planes, drones, helicopter
 ### What Makes ACE Special
 
 - **Lightning-Fast Response**  
-  Runs at 2000 times per second (2000 Hz) with almost zero delay — giving you the smoothest and most precise stick feel possible.
+  Runs at 2000 times per second (1000 Hz) with almost zero delay — giving you the smoothest and most precise stick feel possible.
 
 - **Super Fast Radio Link**  
   Uses a custom high-speed 420,000 baud connection to your ExpressLRS or Crossfire module for the lowest possible latency.
@@ -21,9 +21,9 @@ It delivers extremely fast and precise control for RC planes, drones, helicopter
 - **Full Support for Multiple Vehicles**  
   Dedicated screens and tuning pages for:
   - Airplanes
-  - Drones / Multirotors
-  - Helicopters
-  - Cars
+  - (soon)Drones / Multirotors
+  - (soon)Helicopters
+  - (soon)Cars
 
   Each vehicle gets its own dashboard, easy 5-step tuning wizards, and custom RC mapping.
 
