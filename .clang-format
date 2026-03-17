@@ -1,0 +1,15 @@
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AllowShortBlocksOnASingleLine: Always
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLoopsOnASingleLine: true
+BreakBeforeBraces: Attach
+ColumnLimit: 120
+IndentWidth: 4
+MaxEmptyLinesToKeep: 0
+KeepEmptyLinesAtTheStartOfBlocks: false
+ObjCSpaceAfterProperty: false
+PointerAlignment: Right
+SpaceBeforeParens: ControlStatements

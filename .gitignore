@@ -1,0 +1,25 @@
+# Build and Binaries
+build/
+bin/
+*.o
+*.a
+*.so
+*.out
+
+# Project ACE Specific
+.guardian_stamp
+# We keep tree.txt because it's your project map, but we ignore 
+# temporary source lists if they are auto-generated
+source_files.txt
+manifest.txt
+
+# System / IDE Noise
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Qt Specific
+Makefile
+*.pro.user
