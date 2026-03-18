@@ -1,7 +1,7 @@
 // Location: include/windows/mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include "dash/dashboard_panel.h"
+#include "dashboard_panel.h"
 #include <QMainWindow>
 #include <QResizeEvent>
 #include <QTimer>

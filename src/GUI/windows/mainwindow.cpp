@@ -1,5 +1,5 @@
 // Location: src/GUI/windows/mainwindow.cpp
-#include "dash/dashboard_panel.h"
+#include "dashboard_panel.h"
 #include "profiles/profile_manager.h"
 #include "theme/theme.h"
 #include "windows/mainwindow.h"

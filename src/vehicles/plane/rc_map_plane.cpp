@@ -1,6 +1,6 @@
 // Location: src/vehicles/plane/rc_map_plane.cpp
 #include "Core/app_state.h"
-#include "vehicles/plane/rc_map_plane.h"
+#include "rc_map_plane.h"
 #include <algorithm>
 static int16_t get_tuned_val(int16_t raw, bool is_center, bool is_reverse) {
     int32_t val = raw;

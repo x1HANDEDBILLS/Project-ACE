@@ -1,9 +1,9 @@
 // Location: include/dash/dashboard_panel.h
 #ifndef DASHBOARD_PANEL_H
 #define DASHBOARD_PANEL_H
-#include "dash/input_read_panel.h"
-#include "dash/panel_buttons.h"
-#include "dash/settings_panel.h"
+#include "input_read_panel.h"
+#include "panel_buttons.h"
+#include "settings_panel.h"
 #include "profiles/profile_panel.h"
 #include "rc_type/rc_type_panel.h"
 #include "widgets/button.h"

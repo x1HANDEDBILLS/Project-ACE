@@ -10,21 +10,24 @@
 │   │   └── app_state.h
 │   ├── dash/
 │   │   ├── dashboard_panel.h
-│   │   ├── input_read_page1.h
-│   │   ├── input_read_page2.h
-│   │   ├── input_read_page3.h
-│   │   ├── input_read_page4.h
-│   │   ├── input_read_page5.h
-│   │   ├── input_read_panel.h
-│   │   ├── main_car_dash.h
-│   │   ├── main_drone_dash.h
-│   │   ├── main_heli_dash.h
-│   │   ├── main_plane_dash.h
-│   │   ├── panel_buttons.h
-│   │   ├── settings_base.h
-│   │   ├── settings_page1.h
-│   │   ├── settings_page2.h
-│   │   └── settings_panel.h
+│   │   ├── input_read/
+│   │   │   ├── input_read_page1.h
+│   │   │   ├── input_read_page2.h
+│   │   │   ├── input_read_page3.h
+│   │   │   ├── input_read_page4.h
+│   │   │   ├── input_read_page5.h
+│   │   │   └── input_read_panel.h
+│   │   ├── main_dash/
+│   │   │   ├── main_car_dash.h
+│   │   │   ├── main_drone_dash.h
+│   │   │   ├── main_heli_dash.h
+│   │   │   ├── main_plane_dash.h
+│   │   │   └── panel_buttons.h
+│   │   └── settings/
+│   │       ├── settings_base.h
+│   │       ├── settings_page1.h
+│   │       ├── settings_page2.h
+│   │       └── settings_panel.h
 │   ├── input/
 │   │   ├── device_state.h
 │   │   ├── input_manage.h
@@ -47,72 +50,84 @@
 │   │   └── theme.h
 │   ├── vehicles/
 │   │   ├── car/
-│   │   │   ├── input_tune_car_page1.h
-│   │   │   ├── input_tune_car_page2.h
-│   │   │   ├── input_tune_car_page3.h
-│   │   │   ├── input_tune_car_page4.h
-│   │   │   ├── input_tune_car_page5.h
-│   │   │   ├── input_tune_car_panel.h
-│   │   │   ├── rc_map_car_panel.h
-│   │   │   ├── rc_tune_car_page1.h
-│   │   │   ├── rc_tune_car_page2.h
-│   │   │   ├── rc_tune_car_page3.h
-│   │   │   ├── rc_tune_car_page4.h
-│   │   │   ├── rc_tune_car_page5.h
-│   │   │   └── rc_tune_car_panel.h
+│   │   │   ├── map/
+│   │   │   │   └── rc_map_car_panel.h
+│   │   │   ├── trim/
+│   │   │   └── tune/
+│   │   │       ├── input_tune_car_page1.h
+│   │   │       ├── input_tune_car_page2.h
+│   │   │       ├── input_tune_car_page3.h
+│   │   │       ├── input_tune_car_page4.h
+│   │   │       ├── input_tune_car_page5.h
+│   │   │       ├── input_tune_car_panel.h
+│   │   │       ├── rc_tune_car_page1.h
+│   │   │       ├── rc_tune_car_page2.h
+│   │   │       ├── rc_tune_car_page3.h
+│   │   │       ├── rc_tune_car_page4.h
+│   │   │       ├── rc_tune_car_page5.h
+│   │   │       └── rc_tune_car_panel.h
 │   │   ├── drone/
-│   │   │   ├── input_tune_drone_page1.h
-│   │   │   ├── input_tune_drone_page2.h
-│   │   │   ├── input_tune_drone_page3.h
-│   │   │   ├── input_tune_drone_page4.h
-│   │   │   ├── input_tune_drone_page5.h
-│   │   │   ├── input_tune_drone_panel.h
-│   │   │   ├── rc_map_drone_panel.h
-│   │   │   ├── rc_tune_drone_page1.h
-│   │   │   ├── rc_tune_drone_page2.h
-│   │   │   ├── rc_tune_drone_page3.h
-│   │   │   ├── rc_tune_drone_page4.h
-│   │   │   ├── rc_tune_drone_page5.h
-│   │   │   └── rc_tune_drone_panel.h
+│   │   │   ├── map/
+│   │   │   │   └── rc_map_drone_panel.h
+│   │   │   ├── trim/
+│   │   │   └── tune/
+│   │   │       ├── input_tune_drone_page1.h
+│   │   │       ├── input_tune_drone_page2.h
+│   │   │       ├── input_tune_drone_page3.h
+│   │   │       ├── input_tune_drone_page4.h
+│   │   │       ├── input_tune_drone_page5.h
+│   │   │       ├── input_tune_drone_panel.h
+│   │   │       ├── rc_tune_drone_page1.h
+│   │   │       ├── rc_tune_drone_page2.h
+│   │   │       ├── rc_tune_drone_page3.h
+│   │   │       ├── rc_tune_drone_page4.h
+│   │   │       ├── rc_tune_drone_page5.h
+│   │   │       └── rc_tune_drone_panel.h
 │   │   ├── heli/
-│   │   │   ├── input_tune_heli_page1.h
-│   │   │   ├── input_tune_heli_page2.h
-│   │   │   ├── input_tune_heli_page3.h
-│   │   │   ├── input_tune_heli_page4.h
-│   │   │   ├── input_tune_heli_page5.h
-│   │   │   ├── input_tune_heli_panel.h
-│   │   │   ├── rc_map_heli_panel.h
-│   │   │   ├── rc_tune_heli_page1.h
-│   │   │   ├── rc_tune_heli_page2.h
-│   │   │   ├── rc_tune_heli_page3.h
-│   │   │   ├── rc_tune_heli_page4.h
-│   │   │   ├── rc_tune_heli_page5.h
-│   │   │   └── rc_tune_heli_panel.h
+│   │   │   ├── map/
+│   │   │   │   └── rc_map_heli_panel.h
+│   │   │   ├── trim/
+│   │   │   └── tune/
+│   │   │       ├── input_tune_heli_page1.h
+│   │   │       ├── input_tune_heli_page2.h
+│   │   │       ├── input_tune_heli_page3.h
+│   │   │       ├── input_tune_heli_page4.h
+│   │   │       ├── input_tune_heli_page5.h
+│   │   │       ├── input_tune_heli_panel.h
+│   │   │       ├── rc_tune_heli_page1.h
+│   │   │       ├── rc_tune_heli_page2.h
+│   │   │       ├── rc_tune_heli_page3.h
+│   │   │       ├── rc_tune_heli_page4.h
+│   │   │       ├── rc_tune_heli_page5.h
+│   │   │       └── rc_tune_heli_panel.h
 │   │   └── plane/
-│   │       ├── input_tune_plane.h
-│   │       ├── input_tune_plane_page1.h
-│   │       ├── input_tune_plane_page2.h
-│   │       ├── input_tune_plane_page3.h
-│   │       ├── input_tune_plane_page4.h
-│   │       ├── input_tune_plane_page5.h
-│   │       ├── input_tune_plane_panel.h
-│   │       ├── rc_map_plane.h
-│   │       ├── rc_map_plane_page1.h
-│   │       ├── rc_map_plane_page2.h
-│   │       ├── rc_map_plane_page3.h
-│   │       ├── rc_map_plane_page4.h
-│   │       ├── rc_map_plane_page5.h
-│   │       ├── rc_map_plane_panel.h
-│   │       ├── rc_mix_plane_panel.h
-│   │       ├── rc_trim_plane.h
-│   │       ├── rc_trim_plane_page1.h
-│   │       ├── rc_trim_plane_panel.h
-│   │       ├── rc_tune_plane_page1.h
-│   │       ├── rc_tune_plane_page2.h
-│   │       ├── rc_tune_plane_page3.h
-│   │       ├── rc_tune_plane_page4.h
-│   │       ├── rc_tune_plane_page5.h
-│   │       └── rc_tune_plane_panel.h
+│   │       ├── map/
+│   │       │   ├── rc_map_plane.h
+│   │       │   ├── rc_map_plane_page1.h
+│   │       │   ├── rc_map_plane_page2.h
+│   │       │   ├── rc_map_plane_page3.h
+│   │       │   ├── rc_map_plane_page4.h
+│   │       │   ├── rc_map_plane_page5.h
+│   │       │   ├── rc_map_plane_panel.h
+│   │       │   └── rc_mix_plane_panel.h
+│   │       ├── trim/
+│   │       │   ├── rc_trim_plane.h
+│   │       │   ├── rc_trim_plane_page1.h
+│   │       │   └── rc_trim_plane_panel.h
+│   │       └── tune/
+│   │           ├── input_tune_plane.h
+│   │           ├── input_tune_plane_page1.h
+│   │           ├── input_tune_plane_page2.h
+│   │           ├── input_tune_plane_page3.h
+│   │           ├── input_tune_plane_page4.h
+│   │           ├── input_tune_plane_page5.h
+│   │           ├── input_tune_plane_panel.h
+│   │           ├── rc_tune_plane_page1.h
+│   │           ├── rc_tune_plane_page2.h
+│   │           ├── rc_tune_plane_page3.h
+│   │           ├── rc_tune_plane_page4.h
+│   │           ├── rc_tune_plane_page5.h
+│   │           └── rc_tune_plane_panel.h
 │   ├── widgets/
 │   │   ├── button.h
 │   │   ├── frame.h
@@ -134,20 +149,23 @@
 │   ├── GUI/
 │   │   ├── dash/
 │   │   │   ├── dashboard_panel.cpp
-│   │   │   ├── input_read_page1.cpp
-│   │   │   ├── input_read_page2.cpp
-│   │   │   ├── input_read_page3.cpp
-│   │   │   ├── input_read_page4.cpp
-│   │   │   ├── input_read_page5.cpp
-│   │   │   ├── input_read_panel.cpp
-│   │   │   ├── main_car_dash.cpp
-│   │   │   ├── main_drone_dash.cpp
-│   │   │   ├── main_heli_dash.cpp
-│   │   │   ├── main_plane_dash.cpp
-│   │   │   ├── panel_buttons.cpp
-│   │   │   ├── settings_page1.cpp
-│   │   │   ├── settings_page2.cpp
-│   │   │   └── settings_panel.cpp
+│   │   │   ├── input_read/
+│   │   │   │   ├── input_read_page1.cpp
+│   │   │   │   ├── input_read_page2.cpp
+│   │   │   │   ├── input_read_page3.cpp
+│   │   │   │   ├── input_read_page4.cpp
+│   │   │   │   ├── input_read_page5.cpp
+│   │   │   │   └── input_read_panel.cpp
+│   │   │   ├── main_dash/
+│   │   │   │   ├── main_car_dash.cpp
+│   │   │   │   ├── main_drone_dash.cpp
+│   │   │   │   ├── main_heli_dash.cpp
+│   │   │   │   ├── main_plane_dash.cpp
+│   │   │   │   └── panel_buttons.cpp
+│   │   │   └── settings/
+│   │   │       ├── settings_page1.cpp
+│   │   │       ├── settings_page2.cpp
+│   │   │       └── settings_panel.cpp
 │   │   ├── profiles/
 │   │   │   └── profile_panel.cpp
 │   │   ├── rc_type/
@@ -158,69 +176,81 @@
 │   │   │   └── theme.cpp
 │   │   ├── vehicles/
 │   │   │   ├── car/
-│   │   │   │   ├── input_tune_car_page1.cpp
-│   │   │   │   ├── input_tune_car_page2.cpp
-│   │   │   │   ├── input_tune_car_page3.cpp
-│   │   │   │   ├── input_tune_car_page4.cpp
-│   │   │   │   ├── input_tune_car_page5.cpp
-│   │   │   │   ├── input_tune_car_panel.cpp
-│   │   │   │   ├── rc_map_car_panel.cpp
-│   │   │   │   ├── rc_tune_car_page1.cpp
-│   │   │   │   ├── rc_tune_car_page2.cpp
-│   │   │   │   ├── rc_tune_car_page3.cpp
-│   │   │   │   ├── rc_tune_car_page4.cpp
-│   │   │   │   ├── rc_tune_car_page5.cpp
-│   │   │   │   └── rc_tune_car_panel.cpp
+│   │   │   │   ├── map/
+│   │   │   │   │   └── rc_map_car_panel.cpp
+│   │   │   │   ├── trim/
+│   │   │   │   └── tune/
+│   │   │   │       ├── input_tune_car_page1.cpp
+│   │   │   │       ├── input_tune_car_page2.cpp
+│   │   │   │       ├── input_tune_car_page3.cpp
+│   │   │   │       ├── input_tune_car_page4.cpp
+│   │   │   │       ├── input_tune_car_page5.cpp
+│   │   │   │       ├── input_tune_car_panel.cpp
+│   │   │   │       ├── rc_tune_car_page1.cpp
+│   │   │   │       ├── rc_tune_car_page2.cpp
+│   │   │   │       ├── rc_tune_car_page3.cpp
+│   │   │   │       ├── rc_tune_car_page4.cpp
+│   │   │   │       ├── rc_tune_car_page5.cpp
+│   │   │   │       └── rc_tune_car_panel.cpp
 │   │   │   ├── drone/
-│   │   │   │   ├── input_tune_drone_page1.cpp
-│   │   │   │   ├── input_tune_drone_page2.cpp
-│   │   │   │   ├── input_tune_drone_page3.cpp
-│   │   │   │   ├── input_tune_drone_page4.cpp
-│   │   │   │   ├── input_tune_drone_page5.cpp
-│   │   │   │   ├── input_tune_drone_panel.cpp
-│   │   │   │   ├── rc_map_drone_panel.cpp
-│   │   │   │   ├── rc_tune_drone_page1.cpp
-│   │   │   │   ├── rc_tune_drone_page2.cpp
-│   │   │   │   ├── rc_tune_drone_page3.cpp
-│   │   │   │   ├── rc_tune_drone_page4.cpp
-│   │   │   │   ├── rc_tune_drone_page5.cpp
-│   │   │   │   └── rc_tune_drone_panel.cpp
+│   │   │   │   ├── map/
+│   │   │   │   │   └── rc_map_drone_panel.cpp
+│   │   │   │   ├── trim/
+│   │   │   │   └── tune/
+│   │   │   │       ├── input_tune_drone_page1.cpp
+│   │   │   │       ├── input_tune_drone_page2.cpp
+│   │   │   │       ├── input_tune_drone_page3.cpp
+│   │   │   │       ├── input_tune_drone_page4.cpp
+│   │   │   │       ├── input_tune_drone_page5.cpp
+│   │   │   │       ├── input_tune_drone_panel.cpp
+│   │   │   │       ├── rc_tune_drone_page1.cpp
+│   │   │   │       ├── rc_tune_drone_page2.cpp
+│   │   │   │       ├── rc_tune_drone_page3.cpp
+│   │   │   │       ├── rc_tune_drone_page4.cpp
+│   │   │   │       ├── rc_tune_drone_page5.cpp
+│   │   │   │       └── rc_tune_drone_panel.cpp
 │   │   │   ├── heli/
-│   │   │   │   ├── input_tune_heli_page1.cpp
-│   │   │   │   ├── input_tune_heli_page2.cpp
-│   │   │   │   ├── input_tune_heli_page3.cpp
-│   │   │   │   ├── input_tune_heli_page4.cpp
-│   │   │   │   ├── input_tune_heli_page5.cpp
-│   │   │   │   ├── input_tune_heli_panel.cpp
-│   │   │   │   ├── rc_map_heli_panel.cpp
-│   │   │   │   ├── rc_tune_heli_page1.cpp
-│   │   │   │   ├── rc_tune_heli_page2.cpp
-│   │   │   │   ├── rc_tune_heli_page3.cpp
-│   │   │   │   ├── rc_tune_heli_page4.cpp
-│   │   │   │   ├── rc_tune_heli_page5.cpp
-│   │   │   │   └── rc_tune_heli_panel.cpp
+│   │   │   │   ├── map/
+│   │   │   │   │   └── rc_map_heli_panel.cpp
+│   │   │   │   ├── trim/
+│   │   │   │   └── tune/
+│   │   │   │       ├── input_tune_heli_page1.cpp
+│   │   │   │       ├── input_tune_heli_page2.cpp
+│   │   │   │       ├── input_tune_heli_page3.cpp
+│   │   │   │       ├── input_tune_heli_page4.cpp
+│   │   │   │       ├── input_tune_heli_page5.cpp
+│   │   │   │       ├── input_tune_heli_panel.cpp
+│   │   │   │       ├── rc_tune_heli_page1.cpp
+│   │   │   │       ├── rc_tune_heli_page2.cpp
+│   │   │   │       ├── rc_tune_heli_page3.cpp
+│   │   │   │       ├── rc_tune_heli_page4.cpp
+│   │   │   │       ├── rc_tune_heli_page5.cpp
+│   │   │   │       └── rc_tune_heli_panel.cpp
 │   │   │   └── plane/
-│   │   │       ├── input_tune_plane_page1.cpp
-│   │   │       ├── input_tune_plane_page2.cpp
-│   │   │       ├── input_tune_plane_page3.cpp
-│   │   │       ├── input_tune_plane_page4.cpp
-│   │   │       ├── input_tune_plane_page5.cpp
-│   │   │       ├── input_tune_plane_panel.cpp
-│   │   │       ├── rc_map_plane_page1.cpp
-│   │   │       ├── rc_map_plane_page2.cpp
-│   │   │       ├── rc_map_plane_page3.cpp
-│   │   │       ├── rc_map_plane_page4.cpp
-│   │   │       ├── rc_map_plane_page5.cpp
-│   │   │       ├── rc_map_plane_panel.cpp
-│   │   │       ├── rc_mix_plane_panel.cpp
-│   │   │       ├── rc_trim_plane_page1.cpp
-│   │   │       ├── rc_trim_plane_panel.cpp
-│   │   │       ├── rc_tune_plane_page1.cpp
-│   │   │       ├── rc_tune_plane_page2.cpp
-│   │   │       ├── rc_tune_plane_page3.cpp
-│   │   │       ├── rc_tune_plane_page4.cpp
-│   │   │       ├── rc_tune_plane_page5.cpp
-│   │   │       └── rc_tune_plane_panel.cpp
+│   │   │       ├── map/
+│   │   │       │   ├── rc_map_plane_page1.cpp
+│   │   │       │   ├── rc_map_plane_page2.cpp
+│   │   │       │   ├── rc_map_plane_page3.cpp
+│   │   │       │   ├── rc_map_plane_page4.cpp
+│   │   │       │   ├── rc_map_plane_page5.cpp
+│   │   │       │   ├── rc_map_plane_panel.cpp
+│   │   │       │   └── rc_mix_plane_panel.cpp
+│   │   │       ├── trim/
+│   │   │       │   ├── rc_trim_plane_page1.cpp
+│   │   │       │   └── rc_trim_plane_panel.cpp
+│   │   │       └── tune/
+│   │   │           ├── input_tune_plane_page1.cpp
+│   │   │           ├── input_tune_plane_page2.cpp
+│   │   │           ├── input_tune_plane_page3.cpp
+│   │   │           ├── input_tune_plane_page4.cpp
+│   │   │           ├── input_tune_plane_page5.cpp
+│   │   │           ├── input_tune_plane_panel.cpp
+│   │   │           ├── rc_tune_plane_page1.cpp
+│   │   │           ├── rc_tune_plane_page2.cpp
+│   │   │           ├── rc_tune_plane_page3.cpp
+│   │   │           ├── rc_tune_plane_page4.cpp
+│   │   │           ├── rc_tune_plane_page5.cpp
+│   │   │           └── rc_tune_plane_panel.cpp
 │   │   ├── widgets/
 │   │   │   ├── button.cpp
 │   │   │   ├── frame.cpp
@@ -252,4 +282,4 @@
 │           └── rc_trim_plane.cpp
 └── tree.txt
 
-41 directories, 212 files
+71 directories, 212 files

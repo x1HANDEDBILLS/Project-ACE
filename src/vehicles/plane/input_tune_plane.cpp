@@ -1,7 +1,7 @@
 // Location: src/vehicles/plane/input_tune_plane.cpp
 #include "Core/app_state.h"
 #include "input/input_manage.h"
-#include "vehicles/plane/input_tune_plane.h"
+#include "input_tune_plane.h"
 #include <algorithm>
 #include <cmath>
 InputTunePlane::InputTunePlane() {}

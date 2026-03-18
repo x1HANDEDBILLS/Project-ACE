@@ -1,9 +1,9 @@
 // Location: src/logic/logic.cpp
 #include "Core/app_state.h"
 #include "logic/logic.h"
-#include "vehicles/plane/input_tune_plane.h"
-#include "vehicles/plane/rc_map_plane.h"
-#include "vehicles/plane/rc_trim_plane.h"
+#include "input_tune_plane.h"
+#include "rc_map_plane.h"
+#include "rc_trim_plane.h"
 std::atomic<bool> Logic::backend_unlocked{false};
 static InputTunePlane plane_tuner;
 static RCMapPlane plane_mapper;

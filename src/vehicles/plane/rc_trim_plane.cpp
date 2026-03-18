@@ -1,6 +1,6 @@
 // Location: src/vehicles/plane/rc_trim_plane.cpp
 #include "Core/app_state.h"
-#include "vehicles/plane/rc_trim_plane.h"
+#include "rc_trim_plane.h"
 #include <algorithm>
 void RCTrimPlane::process() {
     auto &state = AppState::instance();
