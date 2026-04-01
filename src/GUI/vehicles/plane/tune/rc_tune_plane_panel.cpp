@@ -1,11 +1,11 @@
-// Location: src/GUI/vehicles/plane/rc_tune_plane_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/plane/tune/rc_tune_plane_panel.cpp
 #include "rc_tune_plane_page1.h"
 #include "rc_tune_plane_page2.h"
 #include "rc_tune_plane_page3.h"
 #include "rc_tune_plane_page4.h"
 #include "rc_tune_plane_page5.h"
 #include "rc_tune_plane_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

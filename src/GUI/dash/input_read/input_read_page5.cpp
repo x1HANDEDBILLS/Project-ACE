@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/input_read_page5.cpp
+// Location: src/GUI/dash/input_read/input_read_page5.cpp
 #include "input_read_page5.h"
 InputReadPage5::InputReadPage5(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);

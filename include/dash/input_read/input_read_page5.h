@@ -1,4 +1,4 @@
-// Location: include/dash/input_read_page5.h
+// Location: include/dash/input_read/input_read_page5.h
 #ifndef INPUT_READ_PAGE5_H
 #define INPUT_READ_PAGE5_H
 #include <QLabel>

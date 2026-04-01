@@ -1,4 +1,4 @@
-// Location: src/GUI/vehicles/car/input_tune_car_page2.cpp
+// Location: src/GUI/vehicles/car/input_tune/input_tune_car_page2.cpp
 #include "input_tune_car_page2.h"
 #include <QLabel>
 #include <QVBoxLayout>

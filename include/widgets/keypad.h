@@ -10,6 +10,7 @@ class Keypad : public QWidget {
 public:
     explicit Keypad(double initial_val = 0.0, QWidget *parent = nullptr);
     void refresh_theme();
+    void reset();
 signals:
     void submitted(double value);
     void cancelled();

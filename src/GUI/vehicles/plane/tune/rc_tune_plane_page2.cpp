@@ -1,4 +1,4 @@
-// Location: src/GUI/vehicles/plane/rc_tune_plane_page2.cpp
+// Location: src/GUI/vehicles/plane/tune/rc_tune_plane_page2.cpp
 #include "rc_tune_plane_page2.h"
 #include <QLabel>
 #include <QVBoxLayout>

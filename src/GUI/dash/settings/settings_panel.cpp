@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/settings_panel.cpp
+// Location: src/GUI/dash/settings/settings_panel.cpp
 #include "settings_base.h" // New Base
 #include "settings_page1.h"
 #include "settings_page2.h"

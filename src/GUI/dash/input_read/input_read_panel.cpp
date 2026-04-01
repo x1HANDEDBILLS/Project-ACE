@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/input_read_panel.cpp
+// Location: src/GUI/dash/input_read/input_read_panel.cpp
 #include "input_read_page1.h"
 #include "input_read_page2.h"
 #include "input_read_page3.h"

@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_tune_plane_panel.h
+// Location: include/vehicles/plane/tune/rc_tune_plane_panel.h
 #ifndef RC_TUNE_PLANE_PANEL_H
 #define RC_TUNE_PLANE_PANEL_H
 #include "widgets/button.h"

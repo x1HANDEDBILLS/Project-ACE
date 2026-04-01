@@ -1,4 +1,4 @@
-// Location: src/GUI/vehicles/drone/input_tune_drone_page5.cpp
+// Location: src/GUI/vehicles/drone/input_tune/input_tune_drone_page5.cpp
 #include "input_tune_drone_page5.h"
 #include <QLabel>
 #include <QVBoxLayout>

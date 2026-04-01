@@ -1,4 +1,4 @@
-// Location: include/dash/main_car_dash.h
+// Location: include/dash/main_dash/main_car_dash.h
 #ifndef MAIN_CAR_DASH_H
 #define MAIN_CAR_DASH_H
 #include <QFrame>

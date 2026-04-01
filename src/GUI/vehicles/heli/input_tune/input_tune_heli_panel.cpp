@@ -1,11 +1,11 @@
-// Location: src/GUI/vehicles/heli/input_tune_heli_panel.cpp
-#include "theme.h"
+// Location: src/GUI/vehicles/heli/input_tune/input_tune_heli_panel.cpp
 #include "input_tune_heli_page1.h"
 #include "input_tune_heli_page2.h"
 #include "input_tune_heli_page3.h"
 #include "input_tune_heli_page4.h"
 #include "input_tune_heli_page5.h"
 #include "input_tune_heli_panel.h"
+#include "theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

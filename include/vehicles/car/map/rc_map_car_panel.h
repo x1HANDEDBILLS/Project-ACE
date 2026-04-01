@@ -1,4 +1,4 @@
-// Location: include/vehicles/car/rc_map_car_panel.h
+// Location: include/vehicles/car/map/rc_map_car_panel.h
 #ifndef RC_MAP_CAR_PANEL_H
 #define RC_MAP_CAR_PANEL_H
 #include "widgets/button.h"

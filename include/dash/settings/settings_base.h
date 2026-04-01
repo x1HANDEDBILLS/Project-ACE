@@ -1,4 +1,4 @@
-// Location: include/dash/settings_base.h
+// Location: include/dash/settings/settings_base.h
 #ifndef SETTINGS_BASE_H
 #define SETTINGS_BASE_H
 #include "theme/theme.h"

@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_trim_plane_panel.h
+// Location: include/vehicles/plane/trim/rc_trim_plane_panel.h
 #ifndef RC_TRIM_PLANE_PANEL_H
 #define RC_TRIM_PLANE_PANEL_H
 #include "widgets/button.h"

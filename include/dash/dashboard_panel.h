@@ -3,9 +3,9 @@
 #define DASHBOARD_PANEL_H
 #include "input_read_panel.h"
 #include "panel_buttons.h"
-#include "settings_panel.h"
 #include "profiles/profile_panel.h"
 #include "rc_type/rc_type_panel.h"
+#include "settings_panel.h"
 #include "widgets/button.h"
 #include <QFrame>
 #include <QPropertyAnimation>

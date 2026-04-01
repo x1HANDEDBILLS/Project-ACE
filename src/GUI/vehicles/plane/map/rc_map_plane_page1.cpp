@@ -1,5 +1,8 @@
-// Location: src/GUI/vehicles/plane/rc_map_plane_page1.cpp
+// Location: src/GUI/vehicles/plane/map/rc_map_plane_page1.cpp
+
+#include "Core/app_state.h"
 #include "rc_map_plane_page1.h"
+#include "theme/theme.h"
 #include "widgets/source_selector.h"
 #include <QEvent>
 #include <QFrame>
@@ -16,7 +19,7 @@ public:
         accent = ThemeManager::instance().active().hex;
         buildUI();
         refresh();
-        // Connect global signals
+        // Sync with theme changes
         connect(&ThemeManager::instance(), &ThemeManager::themeChanged, this, [this]() {
             accent = ThemeManager::instance().active().hex;
             refresh();
@@ -57,6 +60,7 @@ public:
         auto &state = AppState::instance();
         for (int i = 0; i < buttons.size(); i++) {
             bool is_overridden = false;
+            // Check if any of the 6 split mixers are targeting this channel
             for (int m = 0; m < 6; m++) {
                 if (state.split_mixers[m].target_ch == i) {
                     is_overridden = true;
@@ -67,15 +71,15 @@ public:
             if (is_overridden) {
                 b->setText("SPLIT ACTIVE");
                 b->setEnabled(false);
-                b->setStyleSheet("background:#080808; color:#444; border:1px solid #222; font-size:10px; "
-                                 "font-weight:bold;");
+                b->setStyleSheet(
+                    "background:#080808; color:#444; border:1px solid #222; font-size:10px; font-weight:bold;");
             } else {
                 int current_id = state.channel_map[i];
                 b->setText(current_id == 22 ? "NONE" : QString("ID %1").arg(current_id));
                 b->setEnabled(true);
-                b->setStyleSheet(QString("background:#111; color:%1; border:1px solid #333; "
-                                         "font-weight:bold; font-size:18px;")
-                                     .arg(accent));
+                b->setStyleSheet(
+                    QString("background:#111; color:%1; border:1px solid #333; font-weight:bold; font-size:18px;")
+                        .arg(accent));
             }
         }
     }
@@ -86,7 +90,4 @@ protected:
         return QObject::eventFilter(obj, ev);
     }
 };
-void setup_rc_map_plane_page1_content(QWidget *p) {
-    // This creates the manager and attaches it to the widget's lifecycle
-    new Page1Manager(p);
-}
+void setup_rc_map_plane_page1_content(QWidget *p) { new Page1Manager(p); }

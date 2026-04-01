@@ -1,4 +1,4 @@
-// Location: src/vehicles/plane/rc_trim_plane.cpp
+// Location: src/vehicles/plane/trim/rc_trim_plane.cpp
 #include "Core/app_state.h"
 #include "rc_trim_plane.h"
 #include <algorithm>

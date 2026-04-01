@@ -1,4 +1,4 @@
-// Location: include/dash/main_drone_dash.h
+// Location: include/dash/main_dash/main_drone_dash.h
 #ifndef MAIN_DRONE_DASH_H
 #define MAIN_DRONE_DASH_H
 #include <QFrame>

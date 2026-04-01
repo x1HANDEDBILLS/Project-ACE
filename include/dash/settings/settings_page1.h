@@ -1,4 +1,4 @@
-// Location: include/dash/settings_page1.h
+// Location: include/dash/settings/settings_page1.h
 #ifndef SETTINGS_PAGE1_H
 #define SETTINGS_PAGE1_H
 #include "widgets/button.h"
@@ -8,6 +8,7 @@ class SettingsPage1 : public QWidget {
 public:
     explicit SettingsPage1(QWidget *parent = nullptr);
     // Q_INVOKABLE allows QMetaObject::invokeMethod to find this
+    Button *exit_btn;
     Q_INVOKABLE void refresh_theme();
 private slots:
     void setup_theme_popout();

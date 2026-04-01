@@ -1,7 +1,7 @@
-// Location: src/GUI/vehicles/plane/rc_trim_plane_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/plane/trim/rc_trim_plane_panel.cpp
 #include "rc_trim_plane_page1.h"
 #include "rc_trim_plane_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStackedWidget>

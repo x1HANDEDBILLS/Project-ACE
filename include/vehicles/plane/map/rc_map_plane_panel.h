@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_map_plane_panel.h
+// Location: include/vehicles/plane/map/rc_map_plane_panel.h
 #ifndef RC_MAP_PLANE_PANEL_H
 #define RC_MAP_PLANE_PANEL_H
 #include "widgets/button.h"

@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_mix_plane_panel.h
+// Location: include/vehicles/plane/mix/rc_mix_plane_panel.h
 #pragma once
 #include "widgets/button.h"
 #include "widgets/frame.h"

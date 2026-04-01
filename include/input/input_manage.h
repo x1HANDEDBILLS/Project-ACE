@@ -1,24 +1,23 @@
 // Location: include/input/input_manage.h
 #ifndef INPUT_MANAGE_H
 #define INPUT_MANAGE_H
-#include "input_read.h"
-#include <SDL3/SDL.h>
+#include "input/device_state.h"
+#include "input/input_read.h"
 #include <memory>
-#include <vector>
 class InputManager {
 public:
     static InputManager &instance();
     bool initialize();
     void update();
-    void setVehicleType(int type);
-    int getVehicleType() const { return current_vehicle_type; }
+    // FIX 2: Declared the hotplug function so it can be linked
+    void pollHotplugs();
+    void scoutDevices();
     DeviceState getSlotState(int index) const;
-    ~InputManager();
+    void setVehicleType(int type);
 
 private:
     InputManager();
-    void scoutDevices();
-    // Renamed from 'slots' to 'm_slots' to avoid Qt keyword conflict
+    ~InputManager();
     std::unique_ptr<InputReader> m_slots[4];
     int current_vehicle_type;
 };

@@ -1,4 +1,4 @@
-// Location: include/vehicles/heli/rc_tune_heli_panel.h
+// Location: include/vehicles/heli/tune/rc_tune_heli_panel.h
 #pragma once
 #include "widgets/button.h"
 #include "widgets/frame.h"

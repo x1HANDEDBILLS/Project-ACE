@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_map_plane_page3.h
+// Location: include/vehicles/plane/map/rc_map_plane_page3.h
 #ifndef RC_MAP_PLANE_PAGE3_H
 #define RC_MAP_PLANE_PAGE3_H
 #include "Core/app_state.h"

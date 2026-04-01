@@ -1,6 +1,6 @@
-// Location: src/GUI/vehicles/plane/rc_mix_plane_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/plane/mix/rc_mix_plane_panel.cpp
 #include "rc_mix_plane_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

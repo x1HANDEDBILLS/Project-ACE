@@ -1,4 +1,4 @@
-// Location: src/GUI/vehicles/plane/rc_map_plane_page4.cpp
+// Location: src/GUI/vehicles/plane/map/rc_map_plane_page4.cpp
 #include "rc_map_plane_page4.h"
 #include <QLabel>
 #include <QVBoxLayout>

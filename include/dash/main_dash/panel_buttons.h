@@ -1,4 +1,4 @@
-// Location: include/dash/panel_buttons.h
+// Location: include/dash/main_dash/panel_buttons.h
 #ifndef PANEL_BUTTONS_H
 #define PANEL_BUTTONS_H
 #include "widgets/button.h"

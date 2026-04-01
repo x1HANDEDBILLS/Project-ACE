@@ -1,4 +1,4 @@
-// Location: src/GUI/vehicles/heli/input_tune_heli_page5.cpp
+// Location: src/GUI/vehicles/heli/input_tune/input_tune_heli_page5.cpp
 #include "input_tune_heli_page5.h"
 #include <QLabel>
 #include <QVBoxLayout>

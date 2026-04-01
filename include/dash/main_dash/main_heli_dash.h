@@ -1,4 +1,4 @@
-// Location: include/dash/main_heli_dash.h
+// Location: include/dash/main_dash/main_heli_dash.h
 #ifndef MAIN_HELI_DASH_H
 #define MAIN_HELI_DASH_H
 #include <QFrame>

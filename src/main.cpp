@@ -31,14 +31,15 @@ void *logic_thread_func(void *arg) {
     struct sched_param param;
     param.sched_priority = RT_PRIORITY;
     pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
-    Logic *engine = static_cast<Logic *>(arg);
-    engine->initialize();
+    // FIX: Access the Singleton directly instead of passing a pointer
+    auto &engine = Logic::instance();
+    engine.initialize();
     struct timespec deadline;
     clock_gettime(CLOCK_MONOTONIC, &deadline);
     long interval_ns = 1000000000 / LOGIC_HZ;
     while (keep_running) {
         InputManager::instance().update();
-        engine->run_iteration();
+        engine.run_iteration();
         deadline.tv_nsec += interval_ns;
         if (deadline.tv_nsec >= 1000000000) {
             deadline.tv_sec++;
@@ -68,9 +69,9 @@ int main(int argc, char *argv[]) {
         keep_running = false;
         app.quit();
     });
-    Logic engine;
+    // FIX: Removed "Logic engine;" and passing nullptr as arg
     pthread_t logic_thread;
-    pthread_create(&logic_thread, nullptr, logic_thread_func, &engine);
+    pthread_create(&logic_thread, nullptr, logic_thread_func, nullptr);
     MainWindow w;
     w.show();
     int result = app.exec();

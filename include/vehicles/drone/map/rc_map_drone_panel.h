@@ -1,4 +1,4 @@
-// Location: include/vehicles/drone/rc_map_drone_panel.h
+// Location: include/vehicles/drone/map/rc_map_drone_panel.h
 #ifndef RC_MAP_DRONE_PANEL_H
 #define RC_MAP_DRONE_PANEL_H
 #include "widgets/button.h"

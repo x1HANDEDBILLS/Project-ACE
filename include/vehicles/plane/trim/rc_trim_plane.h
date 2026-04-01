@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_trim_plane.h
+// Location: include/vehicles/plane/trim/rc_trim_plane.h
 #ifndef RC_TRIM_PLANE_H
 #define RC_TRIM_PLANE_H
 class RCTrimPlane {

@@ -1,4 +1,4 @@
-// Location: include/dash/settings_page2.h
+// Location: include/dash/settings/settings_page2.h
 #ifndef SETTINGS_PAGE2_H
 #define SETTINGS_PAGE2_H
 #include "widgets/button.h"

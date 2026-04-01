@@ -1,4 +1,4 @@
-// Location: include/vehicles/car/rc_tune_car_panel.h
+// Location: include/vehicles/car/tune/rc_tune_car_panel.h
 #ifndef RC_TUNE_CAR_PANEL_H
 #define RC_TUNE_CAR_PANEL_H
 #include "widgets/button.h"

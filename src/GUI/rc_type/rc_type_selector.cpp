@@ -10,7 +10,6 @@
 #include <QTimer>
 #include <iostream>
 RCTypeSelector::RCTypeSelector(QWidget *parent) : QWidget(parent) {
-    // FIX: Set a minimum size so it doesn't disappear in layouts
     setMinimumSize(600, 100);
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(10, 10, 10, 10);
@@ -38,11 +37,11 @@ RCTypeSelector::RCTypeSelector(QWidget *parent) : QWidget(parent) {
         AppState::instance().rc_type = types[id];
         emit typeChanged(id);
     });
-    // The Master Handshake: Ensure the 2000Hz engine unlocks after GUI is visible
+    // The Master Handshake: Using the Logic Singleton to unlock the engine
     QTimer::singleShot(500, [this]() {
         refresh_selection();
-        Logic::unlock_backend();
-        std::cout << "\033[1;35m[GUI] Selector Visible & Backend Unlocked\033[0m" << std::endl;
+        Logic::instance().initialize();
+        std::cout << "\033[1;32m[GUI] Selector Visible & Logic Engine Initialized\033[0m" << std::endl;
     });
 }
 void RCTypeSelector::refresh_selection() {
@@ -50,7 +49,7 @@ void RCTypeSelector::refresh_selection() {
     QStringList types = {"PLANE", "DRONE", "HELI", "CAR"};
     int idx = types.indexOf(current);
     if (idx != -1 && group->button(idx)) {
-        group->blockSignals(true); // Don't trigger loops
+        group->blockSignals(true);
         group->button(idx)->setChecked(true);
         InputManager::instance().setVehicleType(idx);
         group->blockSignals(false);

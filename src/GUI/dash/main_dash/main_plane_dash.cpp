@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/main_plane_dash.cpp
+// Location: src/GUI/dash/main_dash/main_plane_dash.cpp
 #include "Core/app_state.h"
 #include "main_plane_dash.h"
 #include "theme/theme.h"

@@ -1,6 +1,6 @@
-// Location: src/GUI/vehicles/drone/rc_map_drone_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/drone/map/rc_map_drone_panel.cpp
 #include "rc_map_drone_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 RCMapDronePanel::RCMapDronePanel(QWidget *parent) : QFrame(parent) {

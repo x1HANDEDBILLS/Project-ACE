@@ -1,4 +1,4 @@
-// Location: include/dash/input_read_panel.h
+// Location: include/dash/input_read/input_read_panel.h
 #ifndef INPUT_READ_PANEL_H
 #define INPUT_READ_PANEL_H
 #include "widgets/button.h"

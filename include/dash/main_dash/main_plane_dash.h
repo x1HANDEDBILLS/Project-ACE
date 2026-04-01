@@ -1,4 +1,4 @@
-// Location: include/dash/main_plane_dash.h
+// Location: include/dash/main_dash/main_plane_dash.h
 #ifndef MAIN_PLANE_DASH_H
 #define MAIN_PLANE_DASH_H
 #include <QFrame>

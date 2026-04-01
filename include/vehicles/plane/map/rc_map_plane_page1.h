@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_map_plane_page1.h
+// Location: include/vehicles/plane/map/rc_map_plane_page1.h
 #pragma once
 #include <QLabel>
 #include <QPushButton>

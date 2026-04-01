@@ -1,4 +1,4 @@
-// Location: include/dash/settings_panel.h
+// Location: include/dash/settings/settings_panel.h
 #ifndef SETTINGS_PANEL_H
 #define SETTINGS_PANEL_H
 #include "widgets/button.h"

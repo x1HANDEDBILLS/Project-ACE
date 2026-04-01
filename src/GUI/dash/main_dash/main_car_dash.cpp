@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/main_car_dash.cpp
+// Location: src/GUI/dash/main_dash/main_car_dash.cpp
 #include "Core/app_state.h"
 #include "main_car_dash.h"
 #include "theme/theme.h"

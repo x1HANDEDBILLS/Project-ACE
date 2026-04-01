@@ -1,4 +1,4 @@
-// Location: include/vehicles/plane/rc_trim_plane_page1.h
+// Location: include/vehicles/plane/trim/rc_trim_plane_page1.h
 #ifndef RC_TRIM_PLANE_PAGE1_H
 #define RC_TRIM_PLANE_PAGE1_H
 #include <QWidget>

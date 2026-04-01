@@ -1,4 +1,4 @@
-// Location: include/vehicles/drone/input_tune_drone_panel.h
+// Location: include/vehicles/drone/input_tune/input_tune_drone_panel.h
 #ifndef INPUT_TUNE_DRONE_PANEL_H
 #define INPUT_TUNE_DRONE_PANEL_H
 #include "widgets/button.h"

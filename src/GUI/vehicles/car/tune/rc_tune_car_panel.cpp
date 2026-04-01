@@ -1,11 +1,11 @@
-// Location: src/GUI/vehicles/car/rc_tune_car_panel.cpp
-#include "theme.h"
+// Location: src/GUI/vehicles/car/tune/rc_tune_car_panel.cpp
 #include "rc_tune_car_page1.h"
 #include "rc_tune_car_page2.h"
 #include "rc_tune_car_page3.h"
 #include "rc_tune_car_page4.h"
 #include "rc_tune_car_page5.h"
 #include "rc_tune_car_panel.h"
+#include "theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

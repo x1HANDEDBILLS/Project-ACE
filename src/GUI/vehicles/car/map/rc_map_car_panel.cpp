@@ -1,6 +1,6 @@
-// Location: src/GUI/vehicles/car/rc_map_car_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/car/map/rc_map_car_panel.cpp
 #include "rc_map_car_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 RCMapCarPanel::RCMapCarPanel(QWidget *parent) : QFrame(parent) {

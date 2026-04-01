@@ -1,11 +1,11 @@
-// Location: src/GUI/vehicles/plane/rc_map_plane_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/plane/map/rc_map_plane_panel.cpp
 #include "rc_map_plane_page1.h"
 #include "rc_map_plane_page2.h"
 #include "rc_map_plane_page3.h"
 #include "rc_map_plane_page4.h"
 #include "rc_map_plane_page5.h"
 #include "rc_map_plane_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

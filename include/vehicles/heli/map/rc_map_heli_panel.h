@@ -1,4 +1,4 @@
-// Location: include/vehicles/heli/rc_map_heli_panel.h
+// Location: include/vehicles/heli/map/rc_map_heli_panel.h
 #ifndef RC_MAP_HELI_PANEL_H
 #define RC_MAP_HELI_PANEL_H
 #include "widgets/button.h"

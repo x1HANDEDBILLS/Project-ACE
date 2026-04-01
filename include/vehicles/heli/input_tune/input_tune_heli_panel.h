@@ -1,4 +1,4 @@
-// Location: include/vehicles/heli/input_tune_heli_panel.h
+// Location: include/vehicles/heli/input_tune/input_tune_heli_panel.h
 #ifndef INPUT_TUNE_HELI_PANEL_H
 #define INPUT_TUNE_HELI_PANEL_H
 #include "widgets/button.h"

@@ -1,4 +1,4 @@
-// Location: include/dash/input_read_page3.h
+// Location: include/dash/input_read/input_read_page3.h
 #ifndef INPUT_READ_PAGE3_H
 #define INPUT_READ_PAGE3_H
 #include <QWidget>

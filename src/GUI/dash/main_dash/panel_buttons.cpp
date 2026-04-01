@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/panel_buttons.cpp
+// Location: src/GUI/dash/main_dash/panel_buttons.cpp
 #include "panel_buttons.h"
 #include <QGridLayout>
 PanelButtons::PanelButtons(QWidget *parent) : QWidget(parent) {

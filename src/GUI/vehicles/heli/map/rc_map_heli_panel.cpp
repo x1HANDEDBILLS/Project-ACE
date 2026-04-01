@@ -1,6 +1,6 @@
-// Location: src/GUI/vehicles/heli/rc_map_heli_panel.cpp
-#include "theme/theme.h"
+// Location: src/GUI/vehicles/heli/map/rc_map_heli_panel.cpp
 #include "rc_map_heli_panel.h"
+#include "theme/theme.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 RCMapHeliPanel::RCMapHeliPanel(QWidget *parent) : QFrame(parent) {

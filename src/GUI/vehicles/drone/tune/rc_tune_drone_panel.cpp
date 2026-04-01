@@ -1,11 +1,11 @@
-// Location: src/GUI/vehicles/drone/rc_tune_drone_panel.cpp
-#include "theme.h"
+// Location: src/GUI/vehicles/drone/tune/rc_tune_drone_panel.cpp
 #include "rc_tune_drone_page1.h"
 #include "rc_tune_drone_page2.h"
 #include "rc_tune_drone_page3.h"
 #include "rc_tune_drone_page4.h"
 #include "rc_tune_drone_page5.h"
 #include "rc_tune_drone_panel.h"
+#include "theme.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>

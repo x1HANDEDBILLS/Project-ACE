@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/main_heli_dash.cpp
+// Location: src/GUI/dash/main_dash/main_heli_dash.cpp
 #include "Core/app_state.h"
 #include "main_heli_dash.h"
 #include "theme/theme.h"

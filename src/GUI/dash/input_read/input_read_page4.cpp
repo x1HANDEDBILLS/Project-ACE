@@ -1,4 +1,4 @@
-// Location: src/GUI/dash/input_read_page4.cpp
+// Location: src/GUI/dash/input_read/input_read_page4.cpp
 #include "Core/app_state.h"
 #include "input_read_page4.h"
 #include "theme/theme.h"
